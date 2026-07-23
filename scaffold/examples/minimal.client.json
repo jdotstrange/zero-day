@@ -1,0 +1,17 @@
+{
+  "$schema": "../scaffold.config.schema.json",
+  "version": "1",
+  "productName": "Acme Portal",
+  "packageName": "acme-portal",
+  "defaultSurface": "light",
+  "primaryHex": "#3b82f6",
+  "accentHex": "#6366f1",
+  "shell": "sidebar",
+  "container": "full",
+  "cardStyle": "shadow",
+  "authLayout": "split",
+  "includeRegister": false,
+  "dashboards": ["Overview", "CRM"],
+  "starterModules": ["Contacts", "Kanban"],
+  "advancedFeatures": []
+}

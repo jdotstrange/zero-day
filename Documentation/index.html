@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<!-- Engineer handbook. Product name stamped at bake. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0-Day — Engineer Handbook</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Iconify -->
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Rethink Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    .code-block { position: relative; }
+    .code-block .copy-btn { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.2s; }
+    .code-block:hover .copy-btn { opacity: 1; }
+    /* Mobile sidebar */
+    .sidebar-open { transform: translateX(0); }
+    .sidebar-closed { transform: translateX(-100%); }
+    @media (min-width: 1024px) {
+      .sidebar-closed { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body class="font-sans bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+
+  <!-- Mobile Overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-y-auto z-40 transition-transform duration-300 sidebar-closed lg:sidebar-open">
+    <!-- Brand -->
+    <div class="h-16 flex items-center px-5 border-b border-slate-200 dark:border-slate-700">
+      <span class="text-lg font-bold text-slate-800 dark:text-white" data-stamp="product-name">0-Day</span>
+      <span class="ml-2 text-xs font-medium text-slate-400 uppercase tracking-wider">Docs</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="p-4">
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3">Getting Started</p>
+      <a href="#what-you-got" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:box-linear" width="18"></iconify-icon>
+        What You Got
+      </a>
+      <a href="#run-it" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:play-circle-linear" width="18"></iconify-icon>
+        Run It
+      </a>
+
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-6">Product &amp; Kit</p>
+      <a href="#product-vs-kit" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:layers-minimalistic-linear" width="18"></iconify-icon>
+        Product vs Kit
+      </a>
+      <a href="#module-map" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:map-linear" width="18"></iconify-icon>
+        Module Map
+      </a>
+
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-6">Customization</p>
+      <a href="#brand-theme" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:palette-linear" width="18"></iconify-icon>
+        Brand &amp; Theme
+      </a>
+      <a href="#shell" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:sidebar-minimalistic-linear" width="18"></iconify-icon>
+        Shell &amp; Layout
+      </a>
+      <a href="#auth" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:shield-user-linear" width="18"></iconify-icon>
+        Auth Screens
+      </a>
+      <a href="#where-to-change" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:pen-2-linear" width="18"></iconify-icon>
+        Where to Change Things
+      </a>
+
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 mt-6">Operations</p>
+      <a href="#env-azure" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:cloud-linear" width="18"></iconify-icon>
+        Env &amp; Azure Handoff
+      </a>
+      <a href="#troubleshooting" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:bug-linear" width="18"></iconify-icon>
+        Troubleshooting
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="lg:ml-64">
+    <!-- Header -->
+    <header class="sticky top-0 h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-6 z-30">
+      <div class="flex items-center gap-3">
+        <!-- Mobile Menu Toggle -->
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+          <iconify-icon icon="solar:hamburger-menu-linear" width="24" class="text-slate-600 dark:text-slate-400"></iconify-icon>
+        </button>
+        <h1 class="text-lg font-semibold text-slate-800 dark:text-white">Engineer Handbook</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="toggleDark()" title="Toggle dark mode" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+          <iconify-icon icon="solar:moon-linear" width="20" class="text-slate-600 dark:text-slate-400"></iconify-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="p-4 lg:p-6">
+      <div class="max-w-5xl mx-auto">
+
+        <!-- What You Got -->
+        <section id="what-you-got" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">What You Got</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">0-Day is a line-of-business admin UI shell: a client-rendered Vite SPA (React 19 + TypeScript + Tailwind CSS 4 + React Router) scaffolded from an internal factory template. It is the front end only — auth, APIs, and background workers live on Azure and get wired in by you, later.</p>
+
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Who this is for:</strong> engineers who inherited a baked client repo produced by the scaffold, or who are exploring the factory template itself. If you are reading this inside the factory repo, the app root is <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">zero-day/</code>; in a baked client repo, the app is the repo root. All <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">src/…</code> paths below are relative to that app root.</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">The product (in the nav)</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">A lean shell: the dashboards, starter modules, and advanced features selected at scaffold time, plus Account Settings. <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">/</code> redirects to the first selected dashboard. There is no marketing landing page in the product path.</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">The kit (on disk)</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Everything else stays on disk and routable by direct URL: forms, tables, charts, pricing, gallery, FAQ, typography, the alternate auth layout, and landing-page sections. Promote pieces into the nav when the client needs them; prune when you're sure they never will.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5 mb-6">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-3">Tech stack</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">React 19</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">TypeScript</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">Vite</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">Tailwind CSS 4</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">React Router</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">Chart.js</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">DND Kit</span>
+              <span class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-sm">Tiptap</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Exact versions live in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">package.json</code>. Not Next.js — no server rendering, no server components.</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Project structure</h3>
+            </div>
+            <div class="bg-slate-900 p-4 overflow-x-auto">
+              <pre class="font-mono text-sm text-slate-100"><code>&lt;app root&gt;/
+├── public/assets/        <span class="text-slate-500"># static assets (logos, images, flags)</span>
+├── src/
+│   ├── components/        <span class="text-slate-500"># reusable UI components (charts, common, ui, …)</span>
+│   ├── context/           <span class="text-slate-500"># React context providers (theme, …)</span>
+│   ├── data/              <span class="text-slate-500"># static/mock data backing every screen</span>
+│   ├── features/          <span class="text-slate-500"># advanced feature modules (rule-engine, workflow-builder, …)</span>
+│   ├── hooks/             <span class="text-slate-500"># custom hooks</span>
+│   ├── i18n/locales/      <span class="text-slate-500"># translations (English-first)</span>
+│   ├── layouts/           <span class="text-slate-500"># layouts + sidebar nav (layouts/sidebar/navData.ts)</span>
+│   ├── pages/             <span class="text-slate-500"># page components</span>
+│   ├── routes/            <span class="text-slate-500"># routing config (routes/index.tsx)</span>
+│   ├── styles/            <span class="text-slate-500"># global styles + CSS variables</span>
+│   └── types/             <span class="text-slate-500"># TypeScript types (types/theme.ts holds theme defaults)</span>
+└── package.json</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Run It -->
+        <section id="run-it" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Run It</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">Node 18+ and npm 9+ (see <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">engines</code> in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">package.json</code>). No environment variables and no backend are needed — every screen runs on mock data.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="code-block bg-slate-900 p-4">
+              <button class="copy-btn px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded" onclick="copyCode(this)">Copy</button>
+              <pre class="font-mono text-sm text-slate-100"><code>npm install
+npm run dev      <span class="text-slate-500"># dev server on http://localhost:5173</span>
+npm run build    <span class="text-slate-500"># type-check (tsc -b) + production build to dist/</span>
+npm run preview  <span class="text-slate-500"># serve the built dist/ locally</span>
+npm run lint     <span class="text-slate-500"># eslint</span></code></pre>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <p class="text-sm text-amber-800 dark:text-amber-200"><strong>Build = type-check.</strong> <code>npm run build</code> runs <code>tsc -b</code> before Vite, so type errors fail the build. That is intentional — don't work around it with <code>@ts-nocheck</code>.</p>
+          </div>
+        </section>
+
+        <!-- Product vs Kit -->
+        <section id="product-vs-kit" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Product vs Kit</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The sidebar (or top rail) controls <em>visibility</em>, not existence. Routes for the whole kit stay registered in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/routes/index.tsx</code> even when a module was deselected at scaffold time. That means a page missing from the nav can still be reached at its direct URL — expected behavior, not a bug.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Kit pages reachable by direct URL (never in the default nav)</h3>
+            </div>
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-slate-700/50">
+                <tr>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Area</th>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">URLs</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Forms</td><td class="px-5 py-3 font-mono text-xs">/forms/layout · /forms/validation · /forms/editor</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Tables</td><td class="px-5 py-3 font-mono text-xs">/tables/simple · /tables/data · /tables/crud</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Charts</td><td class="px-5 py-3 font-mono text-xs">/charts/line · /charts/area · /charts/columns · /charts/pie · /charts/radar · /charts/candlestick</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Alternate auth</td><td class="px-5 py-3 font-mono text-xs">/auth-card/login · /auth-card/register · /auth-card/forgot-password (or /auth/* — whichever layout was <em>not</em> baked; see <a href="#auth" class="text-primary-600 underline">Auth</a>)</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Static pages</td><td class="px-5 py-3 font-mono text-xs">/pages/pricing · /pages/gallery · /pages/faq · /pages/typography</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Landing</td><td class="px-5 py-3 text-xs">Landing/home sections exist under <code>src/pages/home/</code> but are <strong>not routed</strong> — <code>/</code> redirects to the home dashboard.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Promote a kit page</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Add an entry to <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/layouts/sidebar/navData.ts</code>. The route already exists; nav is the only gate.</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Prune a kit page</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Remove the lazy import and route entry from <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/routes/index.tsx</code>, then delete the page component. Only do this when the client will genuinely never need it.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Module Map -->
+        <section id="module-map" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Module Map</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">Everything shippable in the shell, with paths on disk and in the browser. Which of these appear in <em>your</em> nav depends on the scaffold selection; all of them exist on disk.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Dashboards</h3>
+            </div>
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white w-40">Overview</td><td class="px-5 py-3 font-mono text-xs w-56">/dashboard</td><td class="px-5 py-3 text-xs">General KPI landing dashboard</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Analytics</td><td class="px-5 py-3 font-mono text-xs">/dashboard/analytics</td><td class="px-5 py-3 text-xs">Traffic and usage metrics</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">eCommerce</td><td class="px-5 py-3 font-mono text-xs">/dashboard/ecommerce</td><td class="px-5 py-3 text-xs">Orders, revenue, conversion</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">CRM</td><td class="px-5 py-3 font-mono text-xs">/dashboard/crm</td><td class="px-5 py-3 text-xs">Pipeline and deal tracking</td></tr>
+              </tbody>
+            </table>
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+              <p class="text-xs text-slate-500">The first dashboard selected at scaffold time is the app home: <code>/</code>, the post-login redirect, and every logo link point at it. Page components live in <code>src/pages/dashboard/</code>.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Starter modules <span class="font-normal text-xs text-slate-500">(src/pages/apps/)</span></h3>
+            </div>
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white w-40">Email</td><td class="px-5 py-3 font-mono text-xs w-56">/app/email</td><td class="px-5 py-3 text-xs">Inbox / mail client UI</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Chat</td><td class="px-5 py-3 font-mono text-xs">/app/chat</td><td class="px-5 py-3 text-xs">Messaging, plus voice/video call screens</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Calendar</td><td class="px-5 py-3 font-mono text-xs">/app/calendar</td><td class="px-5 py-3 text-xs">Events and scheduling</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Contacts</td><td class="px-5 py-3 font-mono text-xs">/app/contacts</td><td class="px-5 py-3 text-xs">Directory with detail panes</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Blog</td><td class="px-5 py-3 font-mono text-xs">/app/blog</td><td class="px-5 py-3 text-xs">List, detail, and create screens</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">E-commerce</td><td class="px-5 py-3 font-mono text-xs">/app/ecommerce/products</td><td class="px-5 py-3 text-xs">Products CRUD + checkout flow</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Notes</td><td class="px-5 py-3 font-mono text-xs">/app/notes</td><td class="px-5 py-3 text-xs">Note taking</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Kanban</td><td class="px-5 py-3 font-mono text-xs">/app/kanban</td><td class="px-5 py-3 text-xs">Drag-and-drop board</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Advanced features <span class="font-normal text-xs text-slate-500">(src/features/ + src/pages/features/)</span></h3>
+            </div>
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white w-40">Rule Engine</td><td class="px-5 py-3 font-mono text-xs w-56">/features/rule-engine</td><td class="px-5 py-3 text-xs">Visual rule builder with nested condition groups</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Query Builder</td><td class="px-5 py-3 font-mono text-xs">/features/query-builder</td><td class="px-5 py-3 text-xs">Dynamic query construction with SQL/JSON preview</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Simulation</td><td class="px-5 py-3 font-mono text-xs">/features/simulation</td><td class="px-5 py-3 text-xs">Simulated real-time streaming charts</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Insights</td><td class="px-5 py-3 font-mono text-xs">/features/insights</td><td class="px-5 py-3 text-xs">Analytics-style anomaly/trend cards (mock data)</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Workflow Builder</td><td class="px-5 py-3 font-mono text-xs">/features/workflow-builder</td><td class="px-5 py-3 text-xs">Node-based workflow canvas</td></tr>
+                <tr><td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Task Scheduler</td><td class="px-5 py-3 font-mono text-xs">/features/task-scheduler</td><td class="px-5 py-3 text-xs">Gantt, dependencies, cron-style scheduling</td></tr>
+              </tbody>
+            </table>
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+              <p class="text-xs text-slate-500">Each feature module is self-contained under <code>src/features/&lt;name&gt;/</code>: <code>types.ts</code>, <code>engine.ts</code> (logic), <code>config.ts</code>, a <code>use&lt;Feature&gt;</code> hook, and <code>components/</code>. Logic runs client-side against mock data until you wire real services.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Always present</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm"><strong>Account Settings</strong> (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">/pages/account-settings</code>) is in the nav in every scaffold, regardless of selection.</p>
+          </div>
+        </section>
+
+        <!-- Brand & Theme -->
+        <section id="brand-theme" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Brand &amp; Theme</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">Branding is two independent levers: logo files (drop-in, no code) and theme colors (CSS variables plus a baked brand preset).</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Logos — replace files in place, no code changes</h3>
+            </div>
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-slate-700/50">
+                <tr>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">File (public/assets/logo/)</th>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Used for</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3 font-mono text-xs">logo.svg</td><td class="px-5 py-3">Wordmark on <strong>light</strong> backgrounds (sidebar/header, light mode)</td></tr>
+                <tr><td class="px-5 py-3 font-mono text-xs">logo-dark.svg</td><td class="px-5 py-3">Wordmark on <strong>dark</strong> backgrounds (auth panel, dark mode)</td></tr>
+                <tr><td class="px-5 py-3 font-mono text-xs">logomark.svg</td><td class="px-5 py-3">Icon-only mark (collapsed sidebar, favicon via <code>index.html</code>)</td></tr>
+              </tbody>
+            </table>
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+              <p class="text-xs text-slate-500">Keep filenames and rough SVG dimensions. The <code>Logo</code> component and auth layouts read this folder automatically; see <code>public/assets/logo/README.md</code>.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5 mb-4">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-3">Colors — CSS variables + brand preset</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">Primary and accent are CSS variables holding <strong>space-separated RGB channels</strong> (e.g. <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">59 130 246</code>, not hex), consumed as <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">rgb(var(--theme-primary) / &lt;alpha&gt;)</code>. In a baked repo the scaffold's chosen colors are installed as a <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">brand</code> preset and set as the default. To change them, update <em>all three</em> in sync:</p>
+            <ol class="list-decimal list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400">
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/styles/variables.css</code> — <code>--theme-primary</code> / <code>--theme-accent</code></li>
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/types/theme.ts</code> — <code>themeColorPresets</code> entry for the active <code>defaultThemeConfig.color</code></li>
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">index.html</code> — the inline boot script's <code>presets</code> object (prevents a flash of wrong colors before React mounts)</li>
+            </ol>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Light + dark both ship</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Users toggle surface in the header. The <em>default</em> surface (what an empty browser sees first) was baked into <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">defaultThemeConfig.mode</code> in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/types/theme.ts</code>. User choice persists in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">localStorage</code> under <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">&lt;package-name&gt;-theme</code> (the npm name in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">package.json</code>).</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">No end-user theme panel</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">A <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">ThemeCustomizer</code> component exists on disk but is deliberately <strong>unmounted</strong>. Clients get the baked brand, not a theme picker. Mount it in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">RootLayout</code> only if a client explicitly wants runtime theme switching.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Shell & Layout -->
+        <section id="shell" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Shell &amp; Layout</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The shell layout was chosen at scaffold time and baked into <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">defaultThemeConfig</code> in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/types/theme.ts</code>. Both implementations remain in the code.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-slate-700/50">
+                <tr>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Setting</th>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Options</th>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Where</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr>
+                  <td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Shell</td>
+                  <td class="px-5 py-3"><strong>Sidebar</strong> (<code class="font-mono text-xs">sidebarLayout: 'vertical'</code>) or <strong>Top rail</strong> (<code class="font-mono text-xs">'horizontal'</code>: header nav + mega menu)</td>
+                  <td class="px-5 py-3 font-mono text-xs">types/theme.ts → defaultThemeConfig.sidebarLayout</td>
+                </tr>
+                <tr>
+                  <td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Container</td>
+                  <td class="px-5 py-3"><code class="font-mono text-xs">full</code> (edge to edge) or <code class="font-mono text-xs">boxed</code> (centered max-width)</td>
+                  <td class="px-5 py-3 font-mono text-xs">defaultThemeConfig.container</td>
+                </tr>
+                <tr>
+                  <td class="px-5 py-3 font-medium text-slate-800 dark:text-white">Card style</td>
+                  <td class="px-5 py-3"><code class="font-mono text-xs">shadow</code> or <code class="font-mono text-xs">border</code> (applied as a <code class="font-mono text-xs">data-card-style</code> DOM attribute)</td>
+                  <td class="px-5 py-3 font-mono text-xs">defaultThemeConfig.cardStyle</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Top-rail nuance:</strong> in horizontal mode, the full nav comes from <code>HorizontalNav</code> (fed by the same <code>navData.ts</code> groups). The mega menu in <code>AppHeader.tsx</code> shows a subset of starter modules only — advanced features and Contacts appear in the horizontal nav, not the mega menu.</p>
+          </div>
+        </section>
+
+        <!-- Auth -->
+        <section id="auth" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Auth Screens</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">Auth pages are <strong>UI only</strong>. There is no session handling, token storage, or identity provider integration in the shell — that gets wired to the client's Azure backend (see <a href="#env-azure" class="text-primary-600 underline">Env &amp; Azure Handoff</a>).</p>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Split layout — <code class="font-mono text-sm">/auth/*</code></h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Side-by-side layout: brand panel on one half, form on the other (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">AuthLayout</code>).</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Card layout — <code class="font-mono text-sm">/auth-card/*</code></h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Centered single card (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">AuthCardLayout</code>).</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-3">What the scaffold baked</h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
+                <span>One layout was chosen as the live prefix; all login/logout/forgot links point at it. <strong>Both route trees still exist</strong> — the other layout stays reachable by direct URL as kit.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
+                <span><strong>Login</strong> and <strong>forgot-password</strong> are always linked.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
+                <span><strong>Register</strong> is optional: the route always exists, but the "create account" link on the login page appears only if register was selected at scaffold time. To flip it later, edit the create-account block in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/pages/auth/LoginPage.tsx</code>.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
+                <span>Successful login/register navigates to the home dashboard. That redirect lives in the auth page components.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Where to Change Things -->
+        <section id="where-to-change" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Where to Change Things</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The short list of files you'll actually touch.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 dark:bg-slate-700/50">
+                <tr>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">Change</th>
+                  <th class="text-left px-5 py-3 font-semibold text-slate-700 dark:text-slate-200">File</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-600 dark:text-slate-400">
+                <tr><td class="px-5 py-3">Nav items / groups</td><td class="px-5 py-3 font-mono text-xs">src/layouts/sidebar/navData.ts</td></tr>
+                <tr><td class="px-5 py-3">Add a route</td><td class="px-5 py-3 font-mono text-xs">src/routes/index.tsx</td></tr>
+                <tr><td class="px-5 py-3">Add a page</td><td class="px-5 py-3 font-mono text-xs">src/pages/… (create, route it, optionally add to nav)</td></tr>
+                <tr><td class="px-5 py-3">Theme colors</td><td class="px-5 py-3 font-mono text-xs">src/styles/variables.css + src/types/theme.ts + index.html boot script (triple sync — see <a href="#brand-theme" class="text-primary-600 underline">Brand &amp; Theme</a>)</td></tr>
+                <tr><td class="px-5 py-3">Theme defaults (surface, shell, container, cards)</td><td class="px-5 py-3 font-mono text-xs">src/types/theme.ts → defaultThemeConfig</td></tr>
+                <tr><td class="px-5 py-3">Logos</td><td class="px-5 py-3 font-mono text-xs">public/assets/logo/ (drop-in files)</td></tr>
+                <tr><td class="px-5 py-3">UI copy / strings</td><td class="px-5 py-3 font-mono text-xs">src/i18n/locales/en.json</td></tr>
+                <tr><td class="px-5 py-3">Mock data</td><td class="px-5 py-3 font-mono text-xs">src/data/</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+            <p class="text-sm text-amber-800 dark:text-amber-200"><strong>navData.ts is generated.</strong> In a baked repo this file was regenerated by the scaffold from the selected modules — it contains only your selection plus Account Settings, with no demo badges. Hand-editing it is fine and expected, but know that a re-bake would overwrite it; keep client-specific nav changes in version control, not in your memory.</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-2">i18n — English-first</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm">The i18n plumbing is kept but the product ships English-first; treat <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">en.json</code> as the source of truth for UI copy. To add a language: copy <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/i18n/locales/en.json</code> to a new locale file and register it in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/i18n/index.ts</code>. The app defaults to left-to-right; don't change the direction default.</p>
+          </div>
+        </section>
+
+        <!-- Env & Azure Handoff -->
+        <section id="env-azure" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Env &amp; Azure Handoff</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The shell runs with <strong>zero environment variables</strong> — every screen is backed by mock data in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/data/</code>. Real auth, APIs, and workers are the client's Azure estate, and wiring them is engineer work that starts after handoff.</p>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5 mb-4">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-3">When you wire the backend</h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>
+                <span>Vite only exposes variables prefixed <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_</code> to client code (via <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">import.meta.env</code>). Convention for the API entry point: <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_API_BASE_URL</code> pointing at the client's Azure API (App Service, Container Apps, or API Management front door).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>
+                <span>Identity is typically Microsoft Entra ID. The auth screens are the UI for that flow, but no MSAL/token code ships in the shell — add it when the client's tenant and app registration exist. Don't fake it with localStorage sessions in production code.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>
+                <span>Replace mock reads screen by screen: swap the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/data/</code> imports in a page for real fetches. The UI contracts (types in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/types/</code>) tell you what shape the API needs to produce.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>
+                <span>Anything secret does <strong>not</strong> belong in a <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_</code> variable — it ships to the browser. Secrets stay behind the Azure API.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+            <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Deploying the SPA</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm"><code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">npm run build</code> emits a static <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">dist/</code>. Host it on anything static (Azure Static Web Apps, Storage + CDN, App Service). The host <strong>must</strong> serve <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">index.html</code> for unknown paths (SPA fallback) or deep links and refreshes will 404.</p>
+          </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section id="troubleshooting" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Troubleshooting</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The issues engineers actually hit with this shell.</p>
+
+          <div class="space-y-4">
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">Theme or colors don't match what the scaffold configured</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Stale <code>localStorage</code> overrides baked defaults. Clear the <code>&lt;package-name&gt;-theme</code> key (and <code>&lt;package-name&gt;-locale</code> if relevant) in DevTools → Application → Local Storage, then reload. With empty storage, the boot script in <code>index.html</code> does nothing and <code>defaultThemeConfig</code> is the source of truth.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">A page exists on disk but isn't in the sidebar</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Expected. Nav controls visibility, not routing — the whole kit stays routable at direct URLs. Add an entry to <code>src/layouts/sidebar/navData.ts</code> to surface it. See <a href="#product-vs-kit" class="text-primary-600 underline">Product vs Kit</a>.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">Blank page or 404s after npm run build</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Configure SPA fallback: the host must serve <code>index.html</code> for all app routes. If deploying under a sub-path, also set <code>base</code> in <code>vite.config.ts</code>.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">Port 5173 is already in use</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Another Vite dev server is running. Stop it, or run <code>npm run dev -- --port 3000</code>.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">"Unsupported engine" warnings on install</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Node 18+ and npm 9+ are required (<code>engines</code> in <code>package.json</code>). Check with <code>node -v</code>; Node 20 LTS is the safe pick.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">Build fails with TypeScript errors</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3"><code>npm run build</code> runs <code>tsc -b</code> first, so any type error anywhere fails the build — including feature engine files under <code>src/features/</code>. Fix the types; don't suppress with <code>@ts-nocheck</code>.</p>
+            </details>
+            <details class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <summary class="font-semibold text-slate-800 dark:text-white cursor-pointer">Dependency versions drift between machines</summary>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Use <code>npm ci</code> instead of <code>npm install</code> to install exactly what <code>package-lock.json</code> pins. Delete <code>node_modules</code> first if a plain install already ran.</p>
+            </details>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 py-6 px-4 lg:px-6">
+      <p class="text-sm text-slate-500 text-center">0-Day admin shell — engineer handbook.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Toggle sidebar
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.toggle('sidebar-open');
+      sidebar.classList.toggle('sidebar-closed');
+      overlay.classList.toggle('hidden');
+    }
+
+    // Close sidebar when clicking nav link on mobile
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+          toggleSidebar();
+        }
+      });
+    });
+
+    // Dark mode (persisted; docs-local key, unrelated to app theme storage)
+    function toggleDark() {
+      const dark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('docs-dark', dark ? '1' : '0');
+    }
+    if (localStorage.getItem('docs-dark') === '1' ||
+        (localStorage.getItem('docs-dark') === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Copy code
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    // Active nav
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => { if (scrollY >= s.offsetTop - 100) current = s.id; });
+      navLinks.forEach(link => {
+        link.classList.remove('bg-primary-50', 'dark:bg-primary-900/20', 'text-primary-600', 'dark:text-primary-400');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('bg-primary-50', 'dark:bg-primary-900/20', 'text-primary-600', 'dark:text-primary-400');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

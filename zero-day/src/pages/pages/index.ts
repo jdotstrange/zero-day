@@ -1,0 +1,5 @@
+export { default as PricingPage } from './PricingPage'
+export { default as AccountSettingsPage } from './AccountSettingsPage'
+export { default as GalleryPage } from './GalleryPage'
+export { default as FaqPage } from './FaqPage'
+export { default as TypographyGuidePage } from './TypographyGuidePage'

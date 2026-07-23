@@ -1,0 +1,15 @@
+{
+  "$schema": "../scaffold.config.schema.json",
+  "version": "1",
+  "productName": "Prove Analytics",
+  "defaultSurface": "light",
+  "primaryHex": "#3b82f6",
+  "accentHex": "#6366f1",
+  "container": "full",
+  "cardStyle": "shadow",
+  "authLayout": "split",
+  "includeRegister": false,
+  "dashboards": ["Analytics", "CRM"],
+  "starterModules": ["Contacts", "Kanban"],
+  "advancedFeatures": []
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "./scaffold.config.schema.json",
+  "title": "Scaffold Client Configuration",
+  "description": "Machine-readable input for the zero-day scaffold baker (Phase 2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "productName",
+    "defaultSurface",
+    "primaryHex",
+    "accentHex",
+    "container",
+    "cardStyle",
+    "authLayout",
+    "dashboards"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional JSON Schema reference for editor validation (e.g. ../scaffold.config.schema.json)."
+    },
+    "version": {
+      "type": "string",
+      "const": "1",
+      "description": "Schema version. Must be \"1\" for Phase 2 configs."
+    },
+    "productName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable product name shown in the shell, auth screens, and metadata."
+    },
+    "packageName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Optional npm-safe package slug (lowercase letters, digits, hyphens). If omitted, the baker derives one from productName."
+    },
+    "defaultSurface": {
+      "type": "string",
+      "enum": ["light", "dark"],
+      "description": "Default theme surface mode applied on first load."
+    },
+    "primaryHex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "Primary brand color as a 6-digit hex value (e.g. #3b82f6)."
+    },
+    "accentHex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "Accent brand color as a 6-digit hex value (e.g. #6366f1)."
+    },
+    "shell": {
+      "type": "string",
+      "enum": ["sidebar", "top-rail"],
+      "default": "sidebar",
+      "description": "Admin shell navigation layout. Maps to vertical sidebar or horizontal top rail."
+    },
+    "container": {
+      "type": "string",
+      "enum": ["full", "boxed"],
+      "description": "Main content container width strategy."
+    },
+    "cardStyle": {
+      "type": "string",
+      "enum": ["shadow", "border"],
+      "description": "Default card surface treatment across dashboard and app pages."
+    },
+    "authLayout": {
+      "type": "string",
+      "enum": ["split", "card"],
+      "description": "Authentication page layout. Split uses a side panel; card uses a centered card."
+    },
+    "includeRegister": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to include register and related auth routes in the generated app."
+    },
+    "dashboards": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["Overview", "Analytics", "eCommerce", "CRM"]
+      },
+      "description": "Dashboard modules to include in navigation and routing. At least one is required."
+    },
+    "starterModules": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "string",
+        "enum": [
+          "Email",
+          "Chat",
+          "Calendar",
+          "Contacts",
+          "Blog",
+          "E-commerce",
+          "Notes",
+          "Kanban"
+        ]
+      },
+      "description": "Starter app modules to include. May be empty."
+    },
+    "advancedFeatures": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "items": {
+        "type": "string",
+        "enum": [
+          "Rule Engine",
+          "Query Builder",
+          "Simulation",
+          "Insights",
+          "Workflow Builder",
+          "Task Scheduler"
+        ]
+      },
+      "description": "Advanced feature pages to include. Defaults to none."
+    }
+  }
+}

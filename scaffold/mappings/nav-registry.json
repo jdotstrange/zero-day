@@ -1,0 +1,160 @@
+{
+  "dashboards": [
+    {
+      "id": "Overview",
+      "label": "Overview",
+      "path": "/dashboard",
+      "group": "Dashboards",
+      "icon": "dashboard"
+    },
+    {
+      "id": "Analytics",
+      "label": "Analytics",
+      "path": "/dashboard/analytics",
+      "group": "Dashboards",
+      "icon": "chartLine"
+    },
+    {
+      "id": "eCommerce",
+      "label": "eCommerce",
+      "path": "/dashboard/ecommerce",
+      "group": "Dashboards",
+      "icon": "shopping"
+    },
+    {
+      "id": "CRM",
+      "label": "CRM",
+      "path": "/dashboard/crm",
+      "group": "Dashboards",
+      "icon": "briefcase"
+    }
+  ],
+  "starterModules": [
+    {
+      "id": "Email",
+      "label": "Email",
+      "path": "/app/email",
+      "group": "Apps",
+      "icon": "mail"
+    },
+    {
+      "id": "Chat",
+      "label": "Chat",
+      "path": "/app/chat",
+      "group": "Apps",
+      "icon": "message"
+    },
+    {
+      "id": "Calendar",
+      "label": "Calendar",
+      "path": "/app/calendar",
+      "group": "Apps",
+      "icon": "calendar"
+    },
+    {
+      "id": "Contacts",
+      "label": "Contacts",
+      "path": "/app/contacts",
+      "group": "Apps",
+      "icon": "contacts"
+    },
+    {
+      "id": "Blog",
+      "label": "Blog",
+      "path": "/app/blog",
+      "group": "Apps",
+      "icon": "article",
+      "children": [
+        { "id": "BlogAllPosts", "label": "All Posts", "path": "/app/blog" },
+        { "id": "BlogCreatePost", "label": "Create Post", "path": "/app/blog/create" }
+      ]
+    },
+    {
+      "id": "E-commerce",
+      "label": "E-commerce",
+      "path": "/app/ecommerce/products",
+      "group": "Apps",
+      "icon": "shopping",
+      "children": [
+        { "id": "EcommerceProducts", "label": "Products", "path": "/app/ecommerce/products" },
+        { "id": "EcommerceAddProduct", "label": "Add Product", "path": "/app/ecommerce/products/create" },
+        { "id": "EcommerceCheckout", "label": "Checkout", "path": "/app/ecommerce/checkout" }
+      ]
+    },
+    {
+      "id": "Notes",
+      "label": "Notes",
+      "path": "/app/notes",
+      "group": "Apps",
+      "icon": "note"
+    },
+    {
+      "id": "Kanban",
+      "label": "Kanban Board",
+      "path": "/app/kanban",
+      "group": "Apps",
+      "icon": "kanban"
+    }
+  ],
+  "advancedFeatures": [
+    {
+      "id": "Rule Engine",
+      "label": "Rule Engine",
+      "path": "/features/rule-engine",
+      "group": "Apps",
+      "icon": "ruleEngine"
+    },
+    {
+      "id": "Query Builder",
+      "label": "Query Builder",
+      "path": "/features/query-builder",
+      "group": "Apps",
+      "icon": "queryBuilder"
+    },
+    {
+      "id": "Simulation",
+      "label": "Real-Time Simulation",
+      "path": "/features/simulation",
+      "group": "Apps",
+      "icon": "simulation"
+    },
+    {
+      "id": "Insights",
+      "label": "Smart Insights",
+      "path": "/features/insights",
+      "group": "Apps",
+      "icon": "insights"
+    },
+    {
+      "id": "Workflow Builder",
+      "label": "Workflow Builder",
+      "path": "/features/workflow-builder",
+      "group": "Apps",
+      "icon": "workflowBuilder"
+    },
+    {
+      "id": "Task Scheduler",
+      "label": "Task Scheduler",
+      "path": "/features/task-scheduler",
+      "group": "Apps",
+      "icon": "taskScheduler"
+    }
+  ],
+  "alwaysNav": [
+    {
+      "id": "AccountSettings",
+      "label": "Account Settings",
+      "path": "/pages/account-settings",
+      "group": "Pages",
+      "icon": "settings"
+    }
+  ],
+  "shellMap": {
+    "sidebar": "vertical",
+    "top-rail": "horizontal"
+  },
+  "authPrefixMap": {
+    "split": "/auth",
+    "card": "/auth-card"
+  }
+}

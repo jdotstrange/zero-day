@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo/logomark.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>0-Day</title>
+    
+    <!-- Prevent flash of wrong theme -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('zeroday-theme')
+          if (!saved) return
+
+          var config = JSON.parse(saved)
+          var root = document.documentElement
+
+          if (config && config.mode === 'dark') root.classList.add('dark')
+          if (config && config.direction === 'rtl') root.dir = 'rtl'
+
+          // Apply color quickly (kept tiny + dependency-free) — space-separated RGB channels
+          var presets = {
+            blue: ['59 130 246', '99 102 241'],
+            purple: ['236 72 153', '14 165 233'],
+            green: ['34 197 94', '20 184 166'],
+            orange: ['249 115 22', '245 158 11'],
+            red: ['239 68 68', '244 63 94'],
+            cyan: ['6 182 212', '14 165 233'],
+          }
+          if (config && config.color && presets[config.color]) {
+            root.style.setProperty('--theme-primary', presets[config.color][0])
+            root.style.setProperty('--theme-accent', presets[config.color][1])
+          }
+
+          if (config && config.sidebarLayout) root.dataset.sidebarLayout = config.sidebarLayout
+          if (config && config.container) root.dataset.container = config.container
+          if (config && config.cardStyle) root.dataset.cardStyle = config.cardStyle
+        } catch (e) {
+          // ignore
+        }
+      })()
+    </script>
+    
+    <!-- Google Fonts: DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

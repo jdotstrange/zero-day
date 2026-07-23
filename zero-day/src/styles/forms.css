@@ -1,0 +1,420 @@
+/* ========================================
+   0-Day - Form Primitives
+   Shared input, label, and field styles
+   ======================================== */
+
+@layer utilities {
+  /* --------------------------------
+     Field sizing tokens
+     -------------------------------- */
+
+  :root {
+    --field-height-sm: 2.25rem;
+    --field-height-md: 2.5rem;
+    --field-height-lg: 2.75rem;
+    --field-affix-inline: 2.5rem;
+  }
+
+  /* --------------------------------
+     Field base (input, select, textarea)
+     -------------------------------- */
+
+  .input,
+  .select,
+  .textarea,
+  .input-theme,
+  .select-trigger {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--field-height-md);
+    height: var(--field-height-md);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-surface-300);
+    background-color: white;
+    color: var(--color-secondary-900);
+    font-family: inherit;
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    line-height: var(--leading-compact);
+    transition:
+      border-color var(--duration-fast),
+      box-shadow var(--duration-fast),
+      background-color var(--duration-fast);
+  }
+
+  .input::placeholder,
+  .textarea::placeholder,
+  .input-theme::placeholder {
+    color: var(--color-secondary-400);
+    font-weight: 400;
+  }
+
+  .input:focus,
+  .select:focus,
+  .select-trigger:focus,
+  .textarea:focus,
+  .input-theme:focus {
+    outline: none;
+    border-color: rgb(var(--theme-primary));
+    box-shadow: 0 0 0 3px rgb(var(--theme-primary) / 0.12);
+  }
+
+  .dark .input,
+  .dark .select,
+  .dark .select-trigger,
+  .dark .textarea,
+  .dark .input-theme {
+    border-color: var(--color-surface-700);
+    background-color: var(--color-surface-800);
+    color: var(--color-surface-50);
+  }
+
+  .dark .input:focus,
+  .dark .select:focus,
+  .dark .select-trigger:focus,
+  .dark .textarea:focus,
+  .dark .input-theme:focus {
+    border-color: rgb(var(--theme-primary));
+    box-shadow: 0 0 0 3px rgb(var(--theme-primary) / 0.2);
+  }
+
+  .input-sm,
+  .select-sm,
+  .select-trigger.select-sm,
+  .textarea-sm {
+    min-height: var(--field-height-sm);
+    height: var(--field-height-sm);
+    padding: 0 var(--space-3);
+    font-size: var(--text-caption);
+  }
+
+  .input-lg,
+  .select-lg,
+  .select-trigger.select-lg,
+  .textarea-lg {
+    min-height: var(--field-height-lg);
+    height: var(--field-height-lg);
+    padding: 0 var(--space-4);
+    font-size: var(--text-body);
+  }
+
+  .input-error,
+  .select-error,
+  .select-trigger.select-error,
+  .textarea-error {
+    border-color: var(--color-danger-500);
+  }
+
+  .input-error:focus,
+  .select-error:focus,
+  .select-trigger.select-error:focus,
+  .textarea-error:focus {
+    border-color: var(--color-danger-500);
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 0.15);
+  }
+
+  .textarea,
+  .textarea-theme {
+    height: auto;
+    min-height: 6rem;
+    padding: var(--space-3) var(--space-4);
+    resize: vertical;
+  }
+
+  /* --------------------------------
+     Input affix (prefix / suffix icons)
+     -------------------------------- */
+
+  .input-affix {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  .input-affix .input {
+    display: block;
+  }
+
+  .input-prefix,
+  .input-suffix {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--field-affix-inline);
+    color: var(--color-secondary-500);
+    pointer-events: none;
+  }
+
+  .input-prefix {
+    left: 0;
+    padding-left: var(--space-3);
+  }
+
+  .input-suffix {
+    right: 0;
+    padding-right: var(--space-3);
+    pointer-events: auto;
+  }
+
+  .input-has-prefix {
+    padding-inline-start: var(--field-affix-inline);
+  }
+
+  .input-has-suffix {
+    padding-inline-end: var(--field-affix-inline);
+  }
+
+  .input-affix-sm {
+    --field-affix-inline: 2.125rem;
+  }
+
+  .input-affix-lg {
+    --field-affix-inline: 2.75rem;
+  }
+
+  /* --------------------------------
+     Custom select
+     -------------------------------- */
+
+  .select-field {
+    position: relative;
+    width: 100%;
+  }
+
+  .select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-inline-end: var(--space-3);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .select-trigger:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .select-trigger.select-open {
+    border-color: rgb(var(--theme-primary));
+    box-shadow: 0 0 0 3px rgb(var(--theme-primary) / 0.12);
+  }
+
+  .select-value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .select-value-placeholder {
+    color: var(--color-secondary-400);
+    font-weight: 400;
+  }
+
+  .select-chevron {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--color-secondary-500);
+    transition: transform var(--duration-fast);
+  }
+
+  .select-trigger.select-open .select-chevron {
+    transform: rotate(180deg);
+    color: rgb(var(--theme-primary));
+  }
+
+  .select-menu {
+    position: absolute;
+    z-index: var(--z-dropdown);
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    max-height: 14rem;
+    overflow-y: auto;
+    padding: var(--space-1);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-surface-200);
+    background-color: white;
+    box-shadow: var(--shadow-lg);
+    animation: select-menu-in var(--duration-fast) ease-out;
+  }
+
+  @keyframes select-menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dark .select-menu {
+    border-color: var(--color-surface-700);
+    background-color: var(--color-surface-900);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--color-secondary-800);
+    font-family: inherit;
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    line-height: var(--leading-compact);
+    text-align: start;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast),
+      color var(--duration-fast);
+  }
+
+  .dark .select-option {
+    color: var(--color-surface-200);
+  }
+
+  .select-option:hover,
+  .select-option-focused {
+    background-color: var(--color-surface-100);
+    color: var(--color-secondary-900);
+  }
+
+  .dark .select-option:hover,
+  .dark .select-option-focused {
+    background-color: var(--color-surface-800);
+    color: var(--color-surface-50);
+  }
+
+  .select-option-selected {
+    background-color: rgb(var(--theme-primary) / 0.1);
+    color: rgb(var(--theme-primary));
+  }
+
+  .select-option-selected:hover,
+  .select-option-selected.select-option-focused {
+    background-color: rgb(var(--theme-primary) / 0.14);
+    color: rgb(var(--theme-primary));
+  }
+
+  .select-option:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .select-option-check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    color: rgb(var(--theme-primary));
+  }
+
+  /* Native select fallback (rare direct usage) */
+  .select-native {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%237d8e9f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    background-size: 1.125rem;
+    padding-inline-end: var(--field-affix-inline);
+  }
+
+  .dark .select-native {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  }
+
+  /* --------------------------------
+     Labels & field helpers
+     -------------------------------- */
+
+  .label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    line-height: var(--leading-compact);
+    color: var(--color-secondary-900);
+  }
+
+  .dark .label {
+    color: var(--color-surface-100);
+  }
+
+  .label-required::after {
+    content: " *";
+    color: var(--color-danger-500);
+  }
+
+  .form-hint {
+    margin-top: var(--space-2);
+    font-size: var(--text-caption);
+    line-height: var(--leading-compact);
+    color: var(--color-secondary-500);
+  }
+
+  .dark .form-hint {
+    color: var(--color-surface-400);
+  }
+
+  .form-error {
+    margin-top: var(--space-2);
+    font-size: var(--text-caption);
+    line-height: var(--leading-compact);
+    color: var(--color-danger-600);
+  }
+
+  .dark .form-error {
+    color: var(--color-danger-400);
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  } 
+
+  /* --------------------------------
+     Checkbox & radio
+     -------------------------------- */
+
+  .checkbox,
+  .checkbox-theme {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-surface-300);
+    accent-color: rgb(var(--theme-primary));
+    cursor: pointer;
+  }
+
+  .checkbox:focus,
+  .checkbox-theme:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(var(--theme-primary) / 0.15);
+  }
+
+  .dark .checkbox,
+  .dark .checkbox-theme {
+    border-color: var(--color-surface-600);
+    background-color: var(--color-surface-800);
+  }
+}

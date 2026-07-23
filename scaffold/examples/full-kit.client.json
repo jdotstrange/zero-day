@@ -1,0 +1,33 @@
+{
+  "$schema": "../scaffold.config.schema.json",
+  "version": "1",
+  "productName": "Nexus Operations Hub",
+  "packageName": "nexus-ops-hub",
+  "defaultSurface": "dark",
+  "primaryHex": "#8b5cf6",
+  "accentHex": "#06b6d4",
+  "shell": "top-rail",
+  "container": "boxed",
+  "cardStyle": "border",
+  "authLayout": "card",
+  "includeRegister": true,
+  "dashboards": ["Overview", "Analytics", "eCommerce", "CRM"],
+  "starterModules": [
+    "Email",
+    "Chat",
+    "Calendar",
+    "Contacts",
+    "Blog",
+    "E-commerce",
+    "Notes",
+    "Kanban"
+  ],
+  "advancedFeatures": [
+    "Rule Engine",
+    "Query Builder",
+    "Simulation",
+    "Insights",
+    "Workflow Builder",
+    "Task Scheduler"
+  ]
+}
