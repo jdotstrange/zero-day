@@ -1,0 +1,19 @@
+{
+  "$schema": "../scaffold.config.schema.json",
+  "version": "1",
+  "productName": "Contoso SSO Portal",
+  "packageName": "contoso-sso-portal",
+  "defaultSurface": "light",
+  "primaryHex": "#0078d4",
+  "accentHex": "#106ebe",
+  "shell": "sidebar",
+  "container": "full",
+  "cardStyle": "shadow",
+  "authLayout": "split",
+  "authMethods": ["entra"],
+  "authPrimary": "entra",
+  "includeRegister": false,
+  "dashboards": ["Overview", "Analytics"],
+  "starterModules": ["Contacts"],
+  "advancedFeatures": []
+}

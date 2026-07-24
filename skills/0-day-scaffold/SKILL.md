@@ -106,14 +106,17 @@ Ask these questions **in this order**. Do not invent extra product questions.
 | 4 | Shell? | Sidebar (default) / Top rail | `shell`: `sidebar` \| `top-rail` |
 | 5 | Container? | Full width / Boxed | `container`: `full` \| `boxed` |
 | 6 | Card style? | Shadow / Border | `cardStyle`: `shadow` \| `border` |
-| 7 | Auth experience? | Split screen / Card | `authLayout`: `split` \| `card` |
-| 8 | Register flow? | No (default) / Yes | `includeRegister` |
-| 9 | Dashboards to front-face? (multi-select, ≥1) | Overview, Analytics, eCommerce, CRM | `dashboards` |
-| 10 | Prebuilt starter modules? (multi-select, may be empty) | Email, Chat, Calendar, Contacts, Blog, E-commerce, Notes, Kanban | `starterModules` |
-| 11 | Advanced features? (multi-select, default none) | Rule Engine, Query Builder, Simulation, Insights, Workflow Builder, Task Scheduler | `advancedFeatures` |
-| 12 | Output directory path for the new client repo? | absolute path; must be empty or nonexistent, not inside `zero-day/` | (bake `--out`, not a config field) |
+| 7 | Auth experience — split screen or centered card? | Split screen / Card | `authLayout`: `split` \| `card` |
+| 8 | Which sign-in paths apply? (select all) | credentials / passwordless (magic link or OTP) / social IdP (Google, Apple) / Microsoft Entra SSO | `authMethods` (default `["credentials"]`) |
+| 9 | Which is primary? *(only if multiple selected)* | one of the selected methods | `authPrimary` (default first selected) |
+| 10 | Passwordless mode — OTP code (default) or magic link? *(only if passwordless selected)* | OTP / magic link | `passwordlessMode`: `otp` \| `magic-link` |
+| 11 | Register / create-account flow? *(only if credentials or passwordless selected; otherwise skip and force `includeRegister: false`)* | No (default) / Yes | `includeRegister` |
+| 12 | Dashboards to front-face? (multi-select, ≥1) | Overview, Analytics, eCommerce, CRM | `dashboards` |
+| 13 | Prebuilt starter modules? (multi-select, may be empty) | Email, Chat, Calendar, Contacts, Blog, E-commerce, Notes, Kanban | `starterModules` |
+| 14 | Advanced features? (multi-select, default none) | Rule Engine, Query Builder, Simulation, Insights, Workflow Builder, Task Scheduler | `advancedFeatures` |
+| 15 | Output directory path for the new client repo? | absolute path; must be empty or nonexistent, not inside `zero-day/` | (bake `--out`, not a config field) |
 
-Array values must use the exact enum strings above (e.g. `"E-commerce"`, `"Rule Engine"`); order in the arrays is nav order, and `dashboards[0]` becomes the app home.
+Array values must use the exact enum strings above (e.g. `"E-commerce"`, `"Rule Engine"`, `"credentials"`); order in the arrays is nav order, and `dashboards[0]` becomes the app home. `authMethods` values: `credentials`, `passwordless`, `social`, `entra`.
 
 **Fixed decisions — state them, never ask:**
 
@@ -122,7 +125,7 @@ Array values must use the exact enum strings above (e.g. `"E-commerce"`, `"Rule 
 - English-first with aggressive brand sweep; ThemeCustomizer stays unmounted; full kit remains on disk (nav controls visibility, not routes).
 - `packageName` auto-derived from `productName` if not provided (slug rule in `scaffold/BAKE.md` §2.3).
 - Bake copies the stamped engineer handbook (`Documentation/index.html` + optional `favicon.ico`) into client `Documentation/`; factory `Documentation/` stays canonical `0-Day`.
-- Vite SPA, not Next; Azure owns auth/API/workers — bake wires none of it.
+- Vite SPA, not Next. Bake always ships `adapter: 'mock'` in `src/auth/config.ts` (demo auth works with no env). Real Entra adapter is on disk and env-gated (`VITE_AZURE_*`); engineering flips one line in `src/auth/config.ts` to go live. Bake does not wire live Azure auth/API/workers.
 
 ## Step 2: Write and validate config
 

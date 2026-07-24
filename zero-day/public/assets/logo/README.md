@@ -1,11 +1,17 @@
 # Logo assets (drop-in)
 
-Replace these files in place to brand the app. No code changes required.
+## Default (shipped)
+
+The UI uses **`logomark.svg`** (icon) plus the live product name from i18n `brand.name` (e.g. “0-Day”, or the client name after bake). There is no SVG wordmark with baked-in copy.
 
 | File | Use |
 |------|-----|
-| `logo.svg` | Wordmark for **light** backgrounds (sidebar/header in light mode) |
-| `logo-dark.svg` | Wordmark for **dark** backgrounds (auth panel, dark mode) |
-| `logomark.svg` | Icon-only mark (collapsed sidebar, favicon via `index.html`) |
+| `logomark.svg` | Icon mark — sidebar (full + mini), header, auth, favicon via `index.html` |
 
-Keep filenames and SVG dimensions similar to the placeholders for best layout. The `Logo` component and auth layouts read from this folder automatically.
+Replace `logomark.svg` in place to change the icon. Keep a similar square-ish aspect ratio.
+
+## Optional wordmark files
+
+`logo.svg` / `logo-dark.svg` may still exist as legacy placeholders. The `Logo` component does **not** use them anymore. You can delete them or keep them for design reference.
+
+To brand a client: drop in a new `logomark.svg` and ensure bake/scaffold set `brand.name` (and related strings) to the product name.

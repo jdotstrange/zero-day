@@ -10,6 +10,9 @@
   "container": "boxed",
   "cardStyle": "border",
   "authLayout": "card",
+  "authMethods": ["credentials", "passwordless", "social"],
+  "authPrimary": "credentials",
+  "passwordlessMode": "otp",
   "includeRegister": true,
   "dashboards": ["Overview", "Analytics", "eCommerce", "CRM"],
   "starterModules": [

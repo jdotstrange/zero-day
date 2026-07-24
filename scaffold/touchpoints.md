@@ -31,9 +31,9 @@ Field → files map for applying `scaffold.config.json` to a copy of `zero-day/`
 | `shell` | `src/types/theme.ts` → `defaultThemeConfig.sidebarLayout` via `nav-registry.shellMap`; `src/layouts/FullLayout.tsx` (reads config); `index.html` FOUC `sidebarLayout` | `sidebar`→`vertical`, `top-rail`→`horizontal` |
 | `container` | `defaultThemeConfig.container`; `index.html` FOUC | `full` \| `boxed` |
 | `cardStyle` | `defaultThemeConfig.cardStyle`; `index.html` FOUC | `shadow` \| `border` (DOM attr `data-card-style`) |
-| `authLayout` | Links: `src/pages/auth/LoginPage.tsx`, `RegisterPage.tsx`, `ForgotPasswordPage.tsx`; logout: `AppHeader.tsx`, `Sidebar.tsx`. Routes: `src/routes/index.tsx` | Repoint hardcoded links to `authPrefix` from `nav-registry.authPrefixMap`. **Keep both route trees** |
-| `includeRegister` | `src/pages/auth/LoginPage.tsx` create-account block | `false`: hide/remove create-account UI; **keep** register routes |
-| `dashboards` | **Regenerate** `src/layouts/sidebar/navData.ts` Dashboards group; `src/routes/index.tsx` `/` `<Navigate>`; all §2.1 home links (see below) | Registry lookup by ID in config order. `homePath` = path of `dashboards[0]`. Routes untouched |
+| `authLayout` | Links: `src/pages/auth/LoginPage.tsx`, `RegisterPage.tsx`, `ForgotPasswordPage.tsx`, `components/CredentialsForm.tsx`; `src/auth/RequireAuth.tsx`; logout: `AppHeader.tsx`, `Sidebar.tsx`. Routes: `src/routes/index.tsx` | Repoint hardcoded `/auth/…` links to `authPrefix` from `nav-registry.authPrefixMap`. **Keep both route trees**. `postLoginPath` is not an auth link — leave alone |
+| `authMethods` / `authPrimary` / `passwordlessMode` / `includeRegister` | **Regenerate** `src/auth/config.ts` → `authConfig` object literal | `methods`, `primary`, `passwordlessMode`, `registerEnabled=includeRegister`; `socialProviders` default `['google','apple']`; **`adapter` always `'mock'`**; `postLoginPath` = `homePath`. Register routes stay mounted; UI/self-redirect is config-driven |
+| `dashboards` | **Regenerate** `src/layouts/sidebar/navData.ts` Dashboards group; `src/routes/index.tsx` `/` `<Navigate>`; all §2.1 home links (see below); `authConfig.postLoginPath` | Registry lookup by ID in config order. `homePath` = path of `dashboards[0]`. Routes untouched |
 | `starterModules` | **Regenerate** `navData.ts` Apps group (before advanced); if `shell === 'top-rail'`: **regenerate** `AppHeader.tsx` `menus` mega items for starters that fit mega shape | `Icons[entry.icon]` per registry. No demo badges. Routes untouched |
 | `advancedFeatures` | **Regenerate** `navData.ts` Apps group (after starters) | In top-rail: **not** in mega menu (template shape); visible via `HorizontalNav` / `navGroups` only. Routes untouched |
 
@@ -46,12 +46,13 @@ All must use `homePath` (first selected dashboard via nav-registry), **not** har
 | File | Symbol / location |
 |---|---|
 | `src/routes/index.tsx` | Index `<Navigate to=…>` |
-| `src/pages/auth/LoginPage.tsx` | Post-login `navigate(…)` |
-| `src/pages/auth/RegisterPage.tsx` | Post-register `navigate(…)` |
+| `src/auth/config.ts` | `authConfig.postLoginPath` |
 | `src/layouts/sidebar/Sidebar.tsx` | Logo `<Link to=…>` |
 | `src/layouts/AuthLayout.tsx` | Logo/home `<Link to=…>` (all instances) |
 | `src/layouts/header/AppHeader.tsx` | Horizontal logo `<Link>`; `TopLink`; mega `footer.to` |
 | `src/pages/errors/NotFoundPage.tsx` | Home / recovery `<Link to=…>` |
+
+Login/Register pages read `authConfig.postLoginPath` — do not rewrite `navigate('/dashboard')` in those files (that pattern is gone).
 
 ---
 
@@ -115,4 +116,4 @@ Stale `localStorage` overrides baked defaults when the saved key exists.
 |---|---|
 | Feature demo storage (`zeroday_rules`, `zeroday_workflows`, …) | Demo feature persistence; not renamed in Phase 2 |
 | `scaffold/` in client output | Stays in factory repo unless future manifest says otherwise |
-| Azure auth/API wiring | Engineer-owned post-bake |
+| Azure auth/API wiring | Engineer-owned post-bake; bake always ships `adapter: 'mock'`. Flip `src/auth/config.ts` adapter + env for live Entra |

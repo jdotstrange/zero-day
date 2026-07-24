@@ -1,14 +1,26 @@
-import { Link, useNavigate } from 'react-router'
+import { Link, Navigate, useNavigate } from 'react-router'
 import { Button, Checkbox, FormField, Input } from '@/components/ui'
+import { authConfig } from '@/auth/config'
+import { useAuth } from '@/hooks/useAuth'
 import { useLocale } from '@/i18n'
 
 export function RegisterPage() {
   const { t } = useLocale()
   const navigate = useNavigate()
+  const { signIn } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (!authConfig.registerEnabled) {
+    return <Navigate to="/auth/login" replace />
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    navigate('/dashboard')
+    const data = new FormData(e.currentTarget)
+    const email = String(data.get('email') ?? '')
+    const password = String(data.get('password') ?? '')
+    // Mock / credentials adapters treat register as sign-in for the demo kit.
+    await signIn({ method: 'credentials', email, password })
+    navigate(authConfig.postLoginPath)
   }
 
   return (
@@ -25,16 +37,17 @@ export function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-2 gap-4">
           <FormField label={t('common.first_name')} htmlFor="firstName">
-            <Input id="firstName" type="text" defaultValue="John" placeholder="John" required />
+            <Input id="firstName" name="firstName" type="text" defaultValue="John" placeholder="John" required />
           </FormField>
           <FormField label={t('common.last_name')} htmlFor="lastName">
-            <Input id="lastName" type="text" defaultValue="Doe" placeholder="Doe" required />
+            <Input id="lastName" name="lastName" type="text" defaultValue="Doe" placeholder="Doe" required />
           </FormField>
         </div>
 
         <FormField label={t('auth.email_address')} htmlFor="email">
           <Input
             id="email"
+            name="email"
             type="email"
             defaultValue="john@example.com"
             placeholder="name@example.com"
@@ -49,6 +62,7 @@ export function RegisterPage() {
         >
           <Input
             id="password"
+            name="password"
             type="password"
             defaultValue="123456789"
             placeholder="••••••••"

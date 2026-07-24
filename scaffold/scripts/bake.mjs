@@ -19,6 +19,8 @@ const STARTER_IDS = ['Email', 'Chat', 'Calendar', 'Contacts', 'Blog', 'E-commerc
 const ADVANCED_IDS = [
   'Rule Engine', 'Query Builder', 'Simulation', 'Insights', 'Workflow Builder', 'Task Scheduler',
 ]
+const AUTH_METHOD_IDS = ['credentials', 'passwordless', 'social', 'entra']
+const PASSWORDLESS_MODES = ['otp', 'magic-link']
 const MEGA_STARTER_IDS = new Set(['Email', 'Chat', 'Notes', 'Kanban', 'Calendar', 'E-commerce', 'Blog'])
 
 const MEGA_ITEM_TEMPLATE = {
@@ -83,7 +85,8 @@ function validateConfig(raw) {
   const allowed = new Set([
     '$schema', 'version', 'productName', 'packageName', 'defaultSurface',
     'primaryHex', 'accentHex', 'shell', 'container', 'cardStyle', 'authLayout',
-    'includeRegister', 'dashboards', 'starterModules', 'advancedFeatures',
+    'authMethods', 'authPrimary', 'passwordlessMode', 'includeRegister',
+    'dashboards', 'starterModules', 'advancedFeatures',
   ])
   for (const k of Object.keys(raw)) {
     if (!allowed.has(k)) errors.push(`Unknown field: ${k}`)
@@ -117,6 +120,44 @@ function validateConfig(raw) {
     errors.push('includeRegister must be boolean')
   }
 
+  let authMethods = raw.authMethods
+  if (authMethods === undefined) {
+    authMethods = ['credentials']
+  } else if (!Array.isArray(authMethods) || authMethods.length < 1) {
+    errors.push('authMethods must be a non-empty array')
+    authMethods = []
+  } else {
+    const seen = new Set()
+    for (const id of authMethods) {
+      if (!AUTH_METHOD_IDS.includes(id)) errors.push(`Invalid authMethods id: ${id}`)
+      if (seen.has(id)) errors.push(`Duplicate authMethods: ${id}`)
+      seen.add(id)
+    }
+  }
+
+  const authPrimary = raw.authPrimary ?? authMethods[0]
+  if (authPrimary !== undefined) {
+    if (!AUTH_METHOD_IDS.includes(authPrimary)) {
+      errors.push('authPrimary must be credentials, passwordless, social, or entra')
+    } else if (authMethods.length && !authMethods.includes(authPrimary)) {
+      errors.push(`authPrimary "${authPrimary}" must be included in authMethods`)
+    }
+  }
+
+  if (raw.passwordlessMode !== undefined && !PASSWORDLESS_MODES.includes(raw.passwordlessMode)) {
+    errors.push('passwordlessMode must be otp or magic-link')
+  }
+
+  const includeRegister = raw.includeRegister ?? false
+  if (
+    includeRegister
+    && authMethods.length
+    && !authMethods.includes('credentials')
+    && !authMethods.includes('passwordless')
+  ) {
+    errors.push('includeRegister requires authMethods to include credentials or passwordless')
+  }
+
   if (!Array.isArray(raw.dashboards) || raw.dashboards.length < 1) {
     errors.push('dashboards must be a non-empty array')
   } else {
@@ -147,9 +188,13 @@ function validateConfig(raw) {
 }
 
 function applyDefaults(raw) {
+  const authMethods = raw.authMethods ?? ['credentials']
   return {
     ...raw,
     shell: raw.shell ?? 'sidebar',
+    authMethods,
+    authPrimary: raw.authPrimary ?? authMethods[0],
+    passwordlessMode: raw.passwordlessMode ?? 'otp',
     includeRegister: raw.includeRegister ?? false,
     starterModules: raw.starterModules ?? [],
     advancedFeatures: raw.advancedFeatures ?? [],
@@ -341,7 +386,7 @@ async function stepColors(out, config) {
     }
     const brandBlock = `brand: {\n    primary: '${primary}',\n    accent: '${accent}',\n  }`
     if (!r.includes('brand:')) {
-      r = r.replace(/(cyan:\s*\{[^}]+\},)\n(\})/, `$1\n  ${brandBlock},\n$2`)
+      r = r.replace(/(cyan:\s*\{[^}]+\},)\r?\n(\})/, `$1\n  ${brandBlock},\n$2`)
     } else {
       r = r.replace(/brand:\s*\{[^}]+\}/, brandBlock)
     }
@@ -351,7 +396,7 @@ async function stepColors(out, config) {
   await transformOut(out, 'index.html', (c) => {
     const brandLine = `brand: ['${primary}', '${accent}']`
     if (!c.includes('brand:')) {
-      return c.replace(/(cyan:\s*\[[^\]]+\],)\n(\s+\})/, `$1\n            ${brandLine},\n$2`)
+      return c.replace(/(cyan:\s*\[[^\]]+\],)\r?\n(\s+\})/, `$1\n            ${brandLine},\n$2`)
     }
     return c.replace(/brand:\s*\[[^\]]+\]/, brandLine)
   })
@@ -370,13 +415,14 @@ async function stepThemeDefaults(out, config, registry) {
 }`
 
   await transformOut(out, 'src/types/theme.ts', (c) =>
-    c.replace(/export const defaultThemeConfig: ThemeConfig = \{[\s\S]*?\n\}/, block),
+    c.replace(/export const defaultThemeConfig: ThemeConfig = \{[\s\S]*?\r?\n\}/, block),
   )
 }
 
 function repointAuth(content, authPrefix) {
   if (authPrefix === '/auth') return content
-  return content.replace(/\/auth\//g, `${authPrefix}/`)
+  // Quote-bound only — never touch Vite alias imports like `@/auth/config`
+  return content.replace(/(['"`])\/auth\//g, `$1${authPrefix}/`)
 }
 
 async function stepAuthLinks(out, config, registry) {
@@ -385,6 +431,8 @@ async function stepAuthLinks(out, config, registry) {
     'src/pages/auth/LoginPage.tsx',
     'src/pages/auth/RegisterPage.tsx',
     'src/pages/auth/ForgotPasswordPage.tsx',
+    'src/pages/auth/components/CredentialsForm.tsx',
+    'src/auth/RequireAuth.tsx',
     'src/layouts/header/AppHeader.tsx',
     'src/layouts/sidebar/Sidebar.tsx',
   ]) {
@@ -392,18 +440,26 @@ async function stepAuthLinks(out, config, registry) {
   }
 }
 
-async function stepRegisterVisibility(out, config) {
-  if (config.includeRegister) return
-  let c = await readOut(out, 'src/pages/auth/LoginPage.tsx')
-  const before = c
-  c = c.replace(
-    /\n      <div className="mt-8 text-center text-body-sm text-secondary-500 dark:text-secondary-400">[\s\S]*?auth\.login\.create_account[\s\S]*?<\/Link>\n      <\/div>/,
-    '\n',
-  )
-  if (c === before || c.includes('auth.login.create_account')) {
-    throw new Error('LoginPage: failed to strip register block (includeRegister false)')
-  }
-  await writeOut(out, 'src/pages/auth/LoginPage.tsx', c)
+function formatAuthConfigBlock(config, homePath) {
+  const methods = config.authMethods.map((m) => `'${m}'`).join(', ')
+  return `export const authConfig: AuthUiConfig = {
+  methods: [${methods}],
+  primary: '${config.authPrimary}',
+  registerEnabled: ${config.includeRegister},
+  passwordlessMode: '${config.passwordlessMode}',
+  socialProviders: ['google', 'apple'],
+  adapter: 'mock',
+  postLoginPath: '${homePath}',
+}`
+}
+
+async function stepAuthConfig(out, config, homePath) {
+  const block = formatAuthConfigBlock(config, homePath)
+  const re = /export const authConfig: AuthUiConfig = \{[\s\S]*?\r?\n\}/
+  await transformOut(out, 'src/auth/config.ts', (c) => {
+    if (!re.test(c)) throw new Error('src/auth/config.ts: authConfig block not found')
+    return c.replace(re, block)
+  })
 }
 
 function lookupById(list, id) {
@@ -516,8 +572,6 @@ async function stepDocumentation(out, config) {
 async function stepHomePath(out, homePath) {
   const replacements = [
     ['src/routes/index.tsx', /(<Navigate to=")\/dashboard(")/g, `$1${homePath}$2`],
-    ['src/pages/auth/LoginPage.tsx', /navigate\('\/dashboard'\)/g, `navigate('${homePath}')`],
-    ['src/pages/auth/RegisterPage.tsx', /navigate\('\/dashboard'\)/g, `navigate('${homePath}')`],
     ['src/layouts/sidebar/Sidebar.tsx', /(<Link to=")\/dashboard(")/g, `$1${homePath}$2`],
     ['src/layouts/AuthLayout.tsx', /(<Link to=")\/dashboard(")/g, `$1${homePath}$2`],
     ['src/pages/errors/NotFoundPage.tsx', /(<Link to=")\/dashboard(")/g, `$1${homePath}$2`],
@@ -539,6 +593,11 @@ async function stepHomePath(out, homePath) {
   const routes = await readOut(out, 'src/routes/index.tsx')
   if (!routes.includes(`to="${homePath}"`)) {
     throw new Error(`routes/index.tsx: failed to repoint Navigate to ${homePath}`)
+  }
+
+  const authLayout = await readOut(out, 'src/layouts/AuthLayout.tsx')
+  if (!authLayout.includes(`to="${homePath}"`)) {
+    throw new Error(`AuthLayout.tsx: failed to repoint home Link to ${homePath}`)
   }
 }
 
@@ -592,12 +651,47 @@ async function printChecklist(out, config, registry, homePath) {
     pass('ThemeContext storage key', tc.includes(`${config.packageName}-theme`))
   } catch { pass('ThemeContext key', false) }
 
-  if (!config.includeRegister) {
+  try {
+    const authCfg = await readOut(out, 'src/auth/config.ts')
+    const methodsLit = `[${config.authMethods.map((m) => `'${m}'`).join(', ')}]`
+    pass("authConfig adapter: 'mock'", /adapter:\s*'mock'/.test(authCfg))
+    pass(`authConfig methods: ${methodsLit}`, authCfg.includes(`methods: ${methodsLit}`))
+    pass(`authConfig postLoginPath: '${homePath}'`, authCfg.includes(`postLoginPath: '${homePath}'`))
+  } catch { pass('src/auth/config.ts authConfig', false) }
+
+  const authPrefix = registry.authPrefixMap[config.authLayout]
+  if (config.authLayout === 'card') {
     try {
-      const login = await readOut(out, 'src/pages/auth/LoginPage.tsx')
-      pass('LoginPage: no create-account block', !login.includes('auth.login.create_account'))
-    } catch { pass('LoginPage register block', false) }
+      const requireAuth = await readOut(out, 'src/auth/RequireAuth.tsx')
+      const header = await readOut(out, 'src/layouts/header/AppHeader.tsx')
+      const sidebar = await readOut(out, 'src/layouts/sidebar/Sidebar.tsx')
+      pass(
+        'RequireAuth uses card auth prefix',
+        requireAuth.includes(`to="${authPrefix}/login"`),
+      )
+      pass(
+        'logout navigates use card auth prefix',
+        header.includes(`navigate('${authPrefix}/login')`)
+          && sidebar.includes(`navigate('${authPrefix}/login')`),
+      )
+    } catch { pass('card authPrefix links', false) }
   }
+
+  try {
+    let corrupt = false
+    async function scan(dir) {
+      for (const ent of await fs.readdir(dir, { withFileTypes: true })) {
+        if (ent.name === 'node_modules' || ent.name === 'dist' || ent.name === '.git') continue
+        const p = path.join(dir, ent.name)
+        if (ent.isDirectory()) await scan(p)
+        else if (/\.(tsx?|jsx?|mjs|cjs|json)$/.test(ent.name)) {
+          if ((await fs.readFile(p, 'utf8')).includes('@/auth-card')) corrupt = true
+        }
+      }
+    }
+    await scan(out)
+    pass("no '@/auth-card' import corruption", !corrupt)
+  } catch { pass("no '@/auth-card' import corruption", false) }
 
   try {
     const docs = await readOut(out, 'Documentation/index.html')
@@ -675,7 +769,7 @@ async function main() {
     await stepColors(out, config)
     await stepThemeDefaults(out, config, registry)
     await stepAuthLinks(out, config, registry)
-    await stepRegisterVisibility(out, config)
+    await stepAuthConfig(out, config, homePath)
     await stepNavData(out, config, registry)
     await stepTopRailMega(out, config, homePath)
     await stepHomePath(out, homePath)

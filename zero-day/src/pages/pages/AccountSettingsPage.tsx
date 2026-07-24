@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Icon, Icons } from '@/components/common'
+import { Icon, Icons, LanguageSwitcher, ThemeModeToggle } from '@/components/common'
 import { Button } from '@/components/ui'
 import { useLocale } from '@/i18n'
 
-type Tab = 'account' | 'notifications' | 'billing' | 'security' | 'devices'
+type Tab = 'account' | 'preferences' | 'notifications' | 'billing' | 'security' | 'devices'
 
 export default function AccountSettingsPage() {
  const { t } = useLocale()
@@ -11,6 +11,7 @@ export default function AccountSettingsPage() {
 
  const tabs = [
  { id: 'account' as Tab, label: t('account.tab.account'), icon: Icons.user },
+ { id: 'preferences' as Tab, label: t('account.tab.preferences'), icon: Icons.settings },
  { id: 'notifications' as Tab, label: t('account.tab.notifications'), icon: Icons.bell },
  { id: 'billing' as Tab, label: t('account.tab.billing'), icon: Icons.creditCard },
  { id: 'security' as Tab, label: t('account.tab.security'), icon: Icons.shield },
@@ -52,12 +53,54 @@ export default function AccountSettingsPage() {
  <div className="lg:col-span-3">
  <div className="card rounded-xl p-6">
  {activeTab === 'account' && <AccountTab />}
+ {activeTab === 'preferences' && <PreferencesTab />}
  {activeTab === 'notifications' && <NotificationsTab />}
  {activeTab === 'billing' && <BillingTab />}
  {activeTab === 'security' && <SecurityTab />}
  {activeTab === 'devices' && <DevicesTab />}
  </div>
  </div>
+ </div>
+ </div>
+ )
+}
+
+function PreferencesTab() {
+ const { t } = useLocale()
+
+ return (
+ <div className="space-y-8">
+ <div>
+ <h2 className="heading-4 text-secondary-900 dark:text-white mb-1">
+ {t('account.preferences')}
+ </h2>
+ <p className="text-sm text-secondary-500 dark:text-secondary-400">
+ {t('account.preferences_desc')}
+ </p>
+ </div>
+
+ <div className="flex items-start justify-between gap-4 border-b border-surface-200 pb-6 dark:border-surface-700">
+ <div className="min-w-0 flex-1">
+ <h3 className="font-medium text-secondary-900 dark:text-white mb-0.5">
+ {t('account.appearance')}
+ </h3>
+ <p className="text-sm text-secondary-600 dark:text-secondary-400">
+ {t('account.appearance_desc')}
+ </p>
+ </div>
+ <ThemeModeToggle />
+ </div>
+
+ <div>
+ <div className="mb-4">
+ <h3 className="font-medium text-secondary-900 dark:text-white mb-0.5">
+ {t('account.language')}
+ </h3>
+ <p className="text-sm text-secondary-600 dark:text-secondary-400">
+ {t('account.language_desc')}
+ </p>
+ </div>
+ <LanguageSwitcher variant="panel" />
  </div>
  </div>
  )

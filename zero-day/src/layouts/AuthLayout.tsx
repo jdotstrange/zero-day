@@ -20,8 +20,8 @@ export function AuthLayout() {
     <div className="flex min-h-screen">
       {/* Left — branding */}
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-white/5 bg-secondary-900 p-10 lg:flex lg:w-1/2 xl:p-12">
-        <Link to="/dashboard" className="relative inline-block">
-          <img src="/assets/logo/logo-dark.svg" alt={t('brand.name')} width={160} height={32} />
+        <Link to="/dashboard" className="relative inline-flex">
+          <Logo height={32} onDark />
         </Link>
 
         <div className="relative max-w-md space-y-8">

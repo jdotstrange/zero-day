@@ -6,6 +6,7 @@ import { RootLayout } from '@/layouts/RootLayout'
 import { BlankLayout } from '@/layouts/BlankLayout'
 import { FullLayout } from '@/layouts/FullLayout'
 import { AuthLayout, AuthCardLayout } from '@/layouts/AuthLayout'
+import { RequireAuth } from '@/auth/RequireAuth'
 
 // Loading fallback component
 const PageLoader = () => (
@@ -163,8 +164,11 @@ export const router = createBrowserRouter([
       // (Admin: Dashboard, Apps, Management, etc.)
       // ============================
       {
-        element: <FullLayout />,
+        element: <RequireAuth />,
         children: [
+          {
+            element: <FullLayout />,
+            children: [
           // Dashboards
           {
             path: 'dashboard',
@@ -350,6 +354,8 @@ export const router = createBrowserRouter([
           {
             path: 'features/task-scheduler',
             element: withSuspense(TaskSchedulerPage),
+          },
+            ],
           },
         ],
       },

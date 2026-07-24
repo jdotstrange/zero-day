@@ -35,11 +35,12 @@ Resolve `homePath` = nav-registry `path` for `dashboards[0]` (first selected das
 
 Repoint **every** hardcoded `/dashboard` (or equivalent “home” entry) link to `homePath`. Do **not** leave Overview (`/dashboard`) as an eternal fallback when Overview is deselected.
 
+Post-login destination for auth pages is **not** rewritten in Login/Register — bake writes `homePath` into `src/auth/config.ts` as `authConfig.postLoginPath` (see §5 auth config).
+
 | Touchpoint | What to change |
 |---|---|
 | `src/routes/index.tsx` | Index route `<Navigate to="…" replace />` → `homePath` |
-| `src/pages/auth/LoginPage.tsx` | Post-login `navigate(…)` → `homePath` |
-| `src/pages/auth/RegisterPage.tsx` | Post-register `navigate(…)` → `homePath` |
+| `src/auth/config.ts` | `authConfig.postLoginPath` → `homePath` |
 | `src/layouts/sidebar/Sidebar.tsx` | Logo `<Link to="…">` → `homePath` |
 | `src/layouts/AuthLayout.tsx` | All logo/home `<Link to="…">` (split + card layouts) → `homePath` |
 | `src/layouts/header/AppHeader.tsx` | Horizontal logo `<Link to="…">`; `TopLink to="…"`; mega menu `footer.to` → `homePath` |
@@ -139,10 +140,18 @@ authPrefixMap:  split → /auth/*  | card → /auth-card/*
 Validate config against the schema before any file writes. Defaults when omitted:
 
 - `shell`: `"sidebar"`
+- `authMethods`: `["credentials"]`
+- `authPrimary`: first entry of `authMethods` (so `["credentials"]` → `"credentials"`)
+- `passwordlessMode`: `"otp"`
 - `includeRegister`: `false`
 - `starterModules`: `[]`
 - `advancedFeatures`: `[]`
 - `packageName`: derive per §2.3
+
+Validation rules (hard-fail):
+
+- `authPrimary` must be a member of `authMethods`.
+- `includeRegister: true` requires `authMethods` to include `credentials` or `passwordless` (register is meaningless for social/SSO-only).
 
 ---
 
@@ -208,20 +217,36 @@ Sync boot script to read `${packageName}-theme` (not `zeroday-theme`) after bran
 Prefix = `authPrefixMap[authLayout]` from nav-registry (`/auth` if `split`, else `/auth-card`).
 
 1. **Keep both** route trees in `src/routes/index.tsx` (`auth` and `auth-card`). Do not delete either.
-2. Repoint hardcoded links to the chosen prefix:
-   - `src/pages/auth/LoginPage.tsx` (forgot-password, register)
+2. Repoint hardcoded `/auth/…` links to the chosen prefix:
+   - `src/pages/auth/LoginPage.tsx` (register)
    - `src/pages/auth/RegisterPage.tsx` (login)
    - `src/pages/auth/ForgotPasswordPage.tsx` (navigate + link to login)
+   - `src/pages/auth/components/CredentialsForm.tsx` (forgot-password)
+   - `src/auth/RequireAuth.tsx` (unauthenticated → login)
    - `src/layouts/header/AppHeader.tsx` (logout → login)
    - `src/layouts/sidebar/Sidebar.tsx` (logout → login)
 3. Ignore kit landing auth links under `src/pages/home/` (landing is not the product entry).
+4. `authConfig.postLoginPath` is a dashboard path (e.g. `/dashboard`), not an `/auth/` link — safe from this rewrite.
 
-### 6. Register visibility (`includeRegister`)
+### 6. Auth UI config (`authMethods`, `authPrimary`, `passwordlessMode`, `includeRegister`)
 
-- If `false`: remove or hide the create-account block on `LoginPage.tsx` (the “no account / create account” footer). Keep register **routes** registered.
-- If `true`: leave create-account link; ensure it uses the chosen auth prefix.
+Regenerate the `export const authConfig: AuthUiConfig = { … }` object literal in `src/auth/config.ts` (regex-target the const; hard-fail if missing). Write:
 
-Login + forgot-password always remain linked.
+| Field | Source |
+|---|---|
+| `methods` | `authMethods` |
+| `primary` | `authPrimary` |
+| `registerEnabled` | `includeRegister` |
+| `passwordlessMode` | `passwordlessMode` |
+| `socialProviders` | leave default `['google', 'apple']` |
+| `adapter` | **always** `'mock'` at bake (never configurable) |
+| `postLoginPath` | computed `homePath` |
+
+Invariants:
+
+- Bake always ships `adapter: 'mock'` (working demo auth). Real Entra/credentials/oauth adapters remain on disk; missing `VITE_AZURE_*` env never blocks bake or first run. Engineering flips one line in `src/auth/config.ts` to go live.
+- Register **routes** stay mounted. When `registerEnabled` is false, LoginPage hides the create-account footer via config and RegisterPage self-redirects to login — do **not** strip LoginPage markup or delete register routes.
+- Both `/auth` and `/auth-card` trees remain (see §5).
 
 ### 7. Navigation regenerate (`dashboards`, `starterModules`, `advancedFeatures`)
 
@@ -233,7 +258,7 @@ Do **not** remove lazy imports or route entries in `src/routes/index.tsx` for de
 
 ### 8. First-dashboard home links
 
-Per §2.1 — repoint all listed touchpoints to `homePath` (`dashboards[0]` via nav-registry).
+Per §2.1 — repoint routes/AuthLayout/shell home links to `homePath`. Auth post-login uses `authConfig.postLoginPath` from §6 (not Login/Register `navigate('/dashboard')` rewrites).
 
 ### 9. Documentation copy + stamp
 
@@ -250,6 +275,7 @@ Copy the engineer handbook from factory `Documentation/` into `<client-repo>/Doc
 - Nav excludes kit demo pages (forms, tables, charts, pricing, gallery, FAQ, typography, auth gallery).
 - `direction` remains `ltr`.
 - English-first brand sweep completed; other locales at least brand-facing keys.
+- `src/auth/config.ts` ships `adapter: 'mock'` and `postLoginPath === homePath`.
 
 ### 11. Install & smoke (manual)
 
@@ -266,7 +292,8 @@ From `<client-repo>/`: `npm install` → `npm run build` (or `npm run dev` for i
 | Repoint all home links to `dashboards[0]` path | Leave `/dashboard` as fallback when Overview deselected |
 | Aggressive brand + storage-key sweep | Shell-only brand replace |
 | Keep `/auth` and `/auth-card` trees | Delete the unused auth layout tree |
-| Hide Login create-account when `includeRegister: false` | Delete register routes when false |
+| Write `authConfig` with `adapter: 'mock'` and `postLoginPath: homePath` | Strip LoginPage markup for register; delete register routes when disabled |
+| Set `registerEnabled` from `includeRegister` | Wire live Entra/credentials adapters during bake |
 | Sync colors in variables.css + theme presets + index.html boot | Update only one of the three |
 | Keep LTR default | Bake RTL as default |
 | Keep Account Settings in nav | Mount `ThemeCustomizer` or add kit pages to nav |
@@ -308,10 +335,11 @@ Run against the **client repo**, not factory `zero-day/`.
 - [ ] `variables.css` `--theme-primary` / `--theme-accent` match those channels
 - [ ] `index.html` boot `presets.brand` matches the same channels
 - [ ] Auth page links use `/auth` or `/auth-card` per `authPrefixMap`; both route trees still exist
-- [ ] `includeRegister: false` → no create-account block on Login; `/register` still routable
+- [ ] `src/auth/config.ts`: `adapter: 'mock'`, `methods` match `authMethods`, `postLoginPath` === `homePath`, `registerEnabled` === `includeRegister`
+- [ ] `includeRegister: false` → create-account footer gated by config; RegisterPage self-redirects; `/register` still routable
 - [ ] `navData.ts` regenerated: selected dashboards/modules/features + Account Settings only; icons via `Icons[entry.icon]`; no demo badges
 - [ ] If top-rail: AppHeader mega regenerated from selected starters; `homePath` on logo, TopLink, mega footer
-- [ ] All §2.1 touchpoints use `homePath`, not hardcoded `/dashboard`
+- [ ] All §2.1 touchpoints use `homePath`, not hardcoded `/dashboard` (auth pages via `postLoginPath`)
 - [ ] `Documentation/index.html` exists in client output; title/brand reflects `productName`; no leftover `0-Day` in that file (factory `Documentation/` unchanged)
 - [ ] ThemeCustomizer not mounted in any layout
 - [ ] `direction` remains `ltr`
@@ -322,9 +350,10 @@ Run against the **client repo**, not factory `zero-day/`.
 - [ ] `npm run build` succeeds
 - [ ] **Clear `${packageName}-theme` (and old `zeroday-theme` if migrating) before visual QA** — stale storage overrides baked defaults
 - [ ] Empty `localStorage`: boot script does nothing; after load, UI matches `defaultThemeConfig` / baked CSS vars
-- [ ] Login + forgot-password reachable; register link behavior matches `includeRegister`
+- [ ] Login + forgot-password reachable; register link / RegisterPage behavior matches `includeRegister` / `registerEnabled`
 - [ ] Selected dashboards open from nav; deselected items absent from nav (direct URL may still work — expected)
 - [ ] With Overview deselected: `/` and all home links land on first selected dashboard path
+- [ ] Login methods match `authMethods` / `authPrimary`; missing Azure env does not block mock sign-in
 
 ---
 

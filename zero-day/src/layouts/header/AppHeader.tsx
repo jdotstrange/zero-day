@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router'
-import { Icon, Icons, LanguageSwitcher, Logo } from '@/components/common'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router'
+import { Icon, Icons, Logo, ThemeModeToggle, LanguageSwitcher } from '@/components/common'
 import { Button } from '@/components/ui'
 import { cn } from '@/components/ui/cn'
 import { useLocale } from '@/i18n'
+import { getLocaleOption } from '@/i18n/localeOptions'
+import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 import { HeaderSearch } from './HeaderSearch'
 
@@ -67,12 +69,16 @@ function TopLink({ to, label }: { to: string; label: string }) {
 
 export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSidebar, onToggleMobileSidebar }: HeaderProps) {
   const location = useLocation()
-  const { t } = useLocale()
+  const navigate = useNavigate()
+  const { t, locale } = useLocale()
+  const { signOut } = useAuth()
   const { config: themeConfig } = useTheme()
   const isRtl = themeConfig.direction === 'rtl'
+  const activeLocale = getLocaleOption(locale)
 
   const [openMega, setOpenMega] = useState<string | null>(null)
   const [userOpen, setUserOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -99,7 +105,10 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
     clearMegaCloseTimer()
     setOpenMega(null)
   })
-  const userRef = useClickOutside<HTMLDivElement>(() => setUserOpen(false))
+  const userRef = useClickOutside<HTMLDivElement>(() => {
+    setUserOpen(false)
+    setLangOpen(false)
+  })
   const notifRef = useClickOutside<HTMLDivElement>(() => setNotifOpen(false))
 
   const menus = useMemo<MegaMenu[]>(
@@ -300,10 +309,6 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
             </Link>
           </Button>
 
-          <div className="hidden sm:block">
-            <LanguageSwitcher />
-          </div>
-
           <div className="relative" ref={notifRef}>
             <button
               type="button"
@@ -345,7 +350,10 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
           <div className="relative" ref={userRef}>
             <button
               type="button"
-              onClick={() => setUserOpen((v) => !v)}
+              onClick={() => {
+                setUserOpen((v) => !v)
+                setLangOpen(false)
+              }}
               className="flex items-center gap-2.5 rounded-xl border-s border-surface-200 py-1 ps-2.5 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800 sm:ps-3"
               aria-label={t('header.user_menu')}
               aria-expanded={userOpen}
@@ -360,7 +368,7 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
             </button>
 
             {userOpen && (
-              <div className="card absolute right-0 z-[1035] mt-2 w-56 rounded-2xl p-2">
+              <div className="card absolute right-0 z-[1035] mt-2 w-64 rounded-2xl p-2">
                 <Link
                   to="/pages/account-settings"
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-secondary-700 hover:bg-surface-50 dark:text-secondary-200 dark:hover:bg-surface-800"
@@ -377,6 +385,54 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
                   <Icon icon={Icons.settings} className="h-5 w-5" />
                   {t('common.settings')}
                 </Link>
+
+                <div className="my-2 border-t border-surface-200 dark:border-surface-700" />
+
+                <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2">
+                  <div className="flex min-w-0 items-center gap-2 text-sm text-secondary-700 dark:text-secondary-200">
+                    <Icon
+                      icon={themeConfig.mode === 'dark' ? Icons.moon : Icons.sun}
+                      className="h-5 w-5 shrink-0"
+                    />
+                    <span>{t('account.appearance')}</span>
+                  </div>
+                  <ThemeModeToggle />
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm text-secondary-700 hover:bg-surface-50 dark:text-secondary-200 dark:hover:bg-surface-800"
+                    onClick={() => setLangOpen((v) => !v)}
+                    aria-expanded={langOpen}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <Icon icon={Icons.globe} className="h-5 w-5 shrink-0" />
+                      <span>{t('language')}</span>
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-secondary-500 dark:text-secondary-400">
+                      {activeLocale.label}
+                      <Icon
+                        icon={Icons.chevronDown}
+                        className={cn('h-4 w-4 transition-transform', langOpen && 'rotate-180')}
+                      />
+                    </span>
+                  </button>
+                  {langOpen && (
+                    <div className="mt-1 rounded-xl bg-surface-50 p-1 dark:bg-surface-800/60">
+                      <LanguageSwitcher
+                        variant="menu"
+                        onSelect={() => {
+                          setLangOpen(false)
+                          setUserOpen(false)
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="my-2 border-t border-surface-200 dark:border-surface-700" />
+
                 <Link
                   to="/pages/faq"
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-secondary-700 hover:bg-surface-50 dark:text-secondary-200 dark:hover:bg-surface-800"
@@ -385,15 +441,17 @@ export function AppHeader({ sidebarWidth, isHorizontal, isCollapsed, onToggleSid
                   <Icon icon={Icons.help} className="h-5 w-5" />
                   {t('common.help')}
                 </Link>
-                <div className="my-2 border-t border-surface-200 dark:border-surface-700" />
-                <Link
-                  to="/auth/login"
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20"
-                  onClick={() => setUserOpen(false)}
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20"
+                  onClick={() => {
+                    setUserOpen(false)
+                    void signOut().then(() => navigate('/auth/login'))
+                  }}
                 >
                   <Icon icon={Icons.logout} className="h-5 w-5" />
                   {t('common.logout')}
-                </Link>
+                </button>
               </div>
             )}
           </div>

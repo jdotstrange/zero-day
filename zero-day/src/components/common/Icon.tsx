@@ -180,6 +180,8 @@ export const Icons = {
   deviceTablet: 'solar:tablet-linear',
   devices: 'solar:devices-linear',
   moon: 'solar:moon-linear',
+  sun: 'solar:sun-linear',
+  globe: 'solar:global-linear',
   package: 'solar:box-linear',
   brandReact: 'solar:code-square-linear',
   rocket: 'solar:rocket-linear',

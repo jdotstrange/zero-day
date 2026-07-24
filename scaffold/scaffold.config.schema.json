@@ -72,10 +72,32 @@
       "enum": ["split", "card"],
       "description": "Authentication page layout. Split uses a side panel; card uses a centered card."
     },
+    "authMethods": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "default": ["credentials"],
+      "items": {
+        "type": "string",
+        "enum": ["credentials", "passwordless", "social", "entra"]
+      },
+      "description": "Sign-in methods exposed on LoginPage (primary first at bake via authPrimary). At least one required."
+    },
+    "authPrimary": {
+      "type": "string",
+      "enum": ["credentials", "passwordless", "social", "entra"],
+      "description": "Primary sign-in method. Defaults to the first entry of authMethods. When set explicitly, must be included in authMethods."
+    },
+    "passwordlessMode": {
+      "type": "string",
+      "enum": ["otp", "magic-link"],
+      "default": "otp",
+      "description": "Passwordless UX mode. Only meaningful when authMethods includes passwordless."
+    },
     "includeRegister": {
       "type": "boolean",
       "default": false,
-      "description": "Whether to include register and related auth routes in the generated app."
+      "description": "Maps to authConfig.registerEnabled. Register routes stay mounted; Login footer and RegisterPage self-redirect when false. Meaningless for social/SSO-only."
     },
     "dashboards": {
       "type": "array",

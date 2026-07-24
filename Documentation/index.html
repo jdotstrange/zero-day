@@ -103,6 +103,10 @@
         <iconify-icon icon="solar:sidebar-minimalistic-linear" width="18"></iconify-icon>
         Shell &amp; Layout
       </a>
+      <a href="#authentication" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <iconify-icon icon="solar:lock-keyhole-linear" width="18"></iconify-icon>
+        Authentication
+      </a>
       <a href="#auth" class="nav-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
         <iconify-icon icon="solar:shield-user-linear" width="18"></iconify-icon>
         Auth Screens
@@ -189,8 +193,9 @@
               <pre class="font-mono text-sm text-slate-100"><code>&lt;app root&gt;/
 ├── public/assets/        <span class="text-slate-500"># static assets (logos, images, flags)</span>
 ├── src/
+│   ├── auth/              <span class="text-slate-500"># config-driven auth kit (adapters, RequireAuth, config)</span>
 │   ├── components/        <span class="text-slate-500"># reusable UI components (charts, common, ui, …)</span>
-│   ├── context/           <span class="text-slate-500"># React context providers (theme, …)</span>
+│   ├── context/           <span class="text-slate-500"># React context providers (theme, auth, …)</span>
 │   ├── data/              <span class="text-slate-500"># static/mock data backing every screen</span>
 │   ├── features/          <span class="text-slate-500"># advanced feature modules (rule-engine, workflow-builder, …)</span>
 │   ├── hooks/             <span class="text-slate-500"># custom hooks</span>
@@ -418,10 +423,138 @@ npm run lint     <span class="text-slate-500"># eslint</span></code></pre>
           </div>
         </section>
 
+        <!-- Authentication -->
+        <section id="authentication" class="mb-12 scroll-mt-20">
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Authentication</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">0-Day ships a config-driven auth kit under <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/auth/</code>. The login UI is composed from config; a single adapter field chooses how sessions are established. Fresh scaffolds always start on the <strong>mock</strong> adapter so the admin shell works day zero with no env and no backend.</p>
+
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <p class="text-sm text-blue-800 dark:text-blue-300"><strong>Mental model:</strong> <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded font-mono text-xs">methods</code> / <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded font-mono text-xs">primary</code> control what the login page shows; <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded font-mono text-xs">adapter</code> controls what actually runs. The kit (adapters, <code class="bg-blue-100 dark:bg-blue-900/50 px-1 rounded font-mono text-xs">RequireAuth</code>, session context) is always on disk — config only chooses the front face and the live implementation.</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">The config file — <code class="font-mono text-sm">src/auth/config.ts</code></h3>
+            </div>
+            <div class="code-block bg-slate-900 p-4">
+              <button class="copy-btn px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded" onclick="copyCode(this)">Copy</button>
+              <pre class="font-mono text-sm text-slate-100"><code>export const authConfig: AuthUiConfig = {
+  methods: ['credentials'],       <span class="text-slate-500">// which sign-in UIs to show</span>
+  primary: 'credentials',         <span class="text-slate-500">// rendered first on LoginPage</span>
+  registerEnabled: true,          <span class="text-slate-500">// login footer + RegisterPage gate (template on-disk)</span>
+  passwordlessMode: 'otp',        <span class="text-slate-500">// 'otp' | 'magic-link'</span>
+  socialProviders: ['google', 'apple'],
+  adapter: 'mock',                <span class="text-slate-500">// ALWAYS 'mock' on a fresh scaffold</span>
+  postLoginPath: '/dashboard',    <span class="text-slate-500">// fallback when no return URL</span>
+}</code></pre>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+              <p class="text-xs text-slate-500">The scaffold interview regenerates this object wholesale (methods, primary, register, passwordless mode, social providers, post-login path). Types above the const stay put. Values above are the template's on-disk defaults; bake writes <code>registerEnabled</code> from the interview (default no). Your baked repo may differ, but <code>adapter</code> is always <code>'mock'</code> until you change it.</p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Demo credentials (mock)</h3>
+              <ul class="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                <li>Any email + password signs in</li>
+                <li>OTP code is <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">000000</code></li>
+                <li>Session persists in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">localStorage</code> (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">zeroday-auth-session</code>)</li>
+                <li>Logout clears it; refresh keeps you signed in</li>
+              </ul>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Login UI composition</h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm"><code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">LoginPage</code> renders only the methods listed in config, primary first. SSO-only (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">methods: ['entra']</code>) is a single Microsoft button — no email fields. Register footer appears only when <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">registerEnabled</code> is true <em>and</em> credentials or passwordless is enabled.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Going live — one-line adapter switch</h3>
+            </div>
+            <div class="px-5 py-4 space-y-4 text-sm text-slate-600 dark:text-slate-400">
+              <p>Set <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">adapter</code> to the implementation you want, keep <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">methods</code> aligned with what that adapter can handle, then wire (or configure) it:</p>
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-700/50">
+                  <tr>
+                    <th class="text-left px-3 py-2 font-semibold text-slate-700 dark:text-slate-200">Adapter</th>
+                    <th class="text-left px-3 py-2 font-semibold text-slate-700 dark:text-slate-200">What you do</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tr>
+                    <td class="px-3 py-2 font-mono text-xs text-slate-800 dark:text-white">credentials</td>
+                    <td class="px-3 py-2">Implement the stub in <code class="font-mono text-xs">adapters/credentials.ts</code> against your login API. Until wired, every method throws <code class="font-mono text-xs">credentials adapter not wired</code>.</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-mono text-xs text-slate-800 dark:text-white">passwordless</td>
+                    <td class="px-3 py-2">Same pattern in <code class="font-mono text-xs">adapters/passwordless.ts</code> — handle <code class="font-mono text-xs">passwordless-request</code> and <code class="font-mono text-xs">passwordless-verify</code> (OTP or magic-link per config).</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-mono text-xs text-slate-800 dark:text-white">oauth</td>
+                    <td class="px-3 py-2">Wire <code class="font-mono text-xs">adapters/oauth.ts</code> for Google / Apple / GitHub (or your IdP). Driven by <code class="font-mono text-xs">socialProviders</code>.</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-mono text-xs text-slate-800 dark:text-white">entra</td>
+                    <td class="px-3 py-2"><strong>Real</strong> MSAL adapter (<code class="font-mono text-xs">@azure/msal-browser</code>). Set <code class="font-mono text-xs">VITE_AZURE_CLIENT_ID</code> + <code class="font-mono text-xs">VITE_AZURE_TENANT_ID</code>; optional <code class="font-mono text-xs">VITE_AZURE_REDIRECT_URI</code> (defaults to <code class="font-mono text-xs">window.location.origin</code>). Register that URI on the Azure app. Uses <code class="font-mono text-xs">loginPopup</code> — for redirect, swap to <code class="font-mono text-xs">loginRedirect</code> / <code class="font-mono text-xs">handleRedirectPromise</code> (noted in the adapter source).</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-slate-800 dark:text-white">Adapter interface</h3>
+            </div>
+            <div class="code-block bg-slate-900 p-4">
+              <button class="copy-btn px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded" onclick="copyCode(this)">Copy</button>
+              <pre class="font-mono text-sm text-slate-100"><code>interface AuthAdapter {
+  id: AdapterId
+  signIn(input: SignInInput): Promise&lt;AuthSession&gt;
+  signOut(): Promise&lt;void&gt;
+  getSession(): Promise&lt;AuthSession | null&gt;
+  onSessionChange(cb: (s: AuthSession | null) =&gt; void): () =&gt; void
+}
+
+type SignInInput =
+  | { method: 'credentials'; email: string; password: string }
+  | { method: 'passwordless-request'; email: string }
+  | { method: 'passwordless-verify'; email: string; code: string }
+  | { method: 'social'; provider: 'google' | 'apple' | 'github' }
+  | { method: 'entra' }</code></pre>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+              <p class="text-xs text-slate-500">Defined in <code>src/auth/types.ts</code>. Registry: <code>getAdapter(id)</code> in <code>src/auth/adapters/index.ts</code>. <code>AuthProvider</code> resolves the live adapter once from <code>authConfig.adapter</code>.</p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Session — <code class="font-mono text-sm">useAuth()</code></h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">From <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/hooks/useAuth.ts</code>: <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">session</code>, <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">status</code> (<code class="font-mono text-xs">loading | authenticated | unauthenticated</code>), <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">signIn</code>, <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">signOut</code>. Must be under <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">AuthProvider</code>.</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
+              <h3 class="font-semibold text-slate-800 dark:text-white mb-2">Route guard — <code class="font-mono text-sm">RequireAuth</code></h3>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">Wraps the admin route tree in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/routes/index.tsx</code>. Unauthenticated visitors go to <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">/auth/login</code> with <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">state.from</code> set so login can return them. If there is no return URL, login falls back to <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">authConfig.postLoginPath</code>.</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <p class="text-sm text-amber-800 dark:text-amber-200 mb-2"><strong>Gotchas</strong></p>
+            <ul class="space-y-1.5 text-sm text-amber-800 dark:text-amber-200">
+              <li>Missing Azure env throws a descriptive error only when the <strong>entra</strong> adapter is invoked (sign-in / MSAL init) — never at import time while <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded font-mono text-xs">adapter: 'mock'</code>.</li>
+              <li>With <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded font-mono text-xs">registerEnabled: false</code>, <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded font-mono text-xs">RegisterPage</code> redirects to login; the route still exists.</li>
+              <li>Both auth layout trees remain available: <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded font-mono text-xs">/auth/*</code> (split) and <code class="bg-amber-100 dark:bg-amber-900/50 px-1 rounded font-mono text-xs">/auth-card/*</code> (card). See <a href="#auth" class="underline">Auth Screens</a>.</li>
+            </ul>
+          </div>
+        </section>
+
         <!-- Auth -->
         <section id="auth" class="mb-12 scroll-mt-20">
           <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Auth Screens</h2>
-          <p class="text-slate-600 dark:text-slate-400 mb-6">Auth pages are <strong>UI only</strong>. There is no session handling, token storage, or identity provider integration in the shell — that gets wired to the client's Azure backend (see <a href="#env-azure" class="text-primary-600 underline">Env &amp; Azure Handoff</a>).</p>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">Two layout route trees for login, register, and forgot-password. The forms themselves are config-driven and backed by the auth kit (working mock adapter by default) — see <a href="#authentication" class="text-primary-600 underline">Authentication</a> for session, adapters, and going live.</p>
 
           <div class="grid md:grid-cols-2 gap-4 mb-4">
             <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5">
@@ -447,11 +580,11 @@ npm run lint     <span class="text-slate-500"># eslint</span></code></pre>
               </li>
               <li class="flex items-start gap-2">
                 <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
-                <span><strong>Register</strong> is optional: the route always exists, but the "create account" link on the login page appears only if register was selected at scaffold time. To flip it later, edit the create-account block in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/pages/auth/LoginPage.tsx</code>.</span>
+                <span><strong>Register</strong> is optional: the route always exists, but the "create account" link appears only when <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">registerEnabled</code> is true (set at scaffold time). Flip it later in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">src/auth/config.ts</code>.</span>
               </li>
               <li class="flex items-start gap-2">
                 <iconify-icon icon="solar:check-circle-linear" width="16" class="text-green-500 mt-0.5"></iconify-icon>
-                <span>Successful login/register navigates to the home dashboard. That redirect lives in the auth page components.</span>
+                <span>Successful login returns to the intended route (<code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">state.from</code>) when present, otherwise <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">authConfig.postLoginPath</code>.</span>
               </li>
             </ul>
           </div>
@@ -496,7 +629,7 @@ npm run lint     <span class="text-slate-500"># eslint</span></code></pre>
         <!-- Env & Azure Handoff -->
         <section id="env-azure" class="mb-12 scroll-mt-20">
           <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Env &amp; Azure Handoff</h2>
-          <p class="text-slate-600 dark:text-slate-400 mb-6">The shell runs with <strong>zero environment variables</strong> — every screen is backed by mock data in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/data/</code>. Real auth, APIs, and workers are the client's Azure estate, and wiring them is engineer work that starts after handoff.</p>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">The shell runs with <strong>zero environment variables</strong> out of the box — screens use mock data in <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">src/data/</code>, and the auth kit ships with <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">adapter: 'mock'</code>. Real APIs and workers are the client's Azure estate; Entra is ready when you flip the adapter and set env (see <a href="#authentication" class="text-primary-600 underline">Authentication</a>).</p>
 
           <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-5 mb-4">
             <h3 class="font-semibold text-slate-800 dark:text-white mb-3">When you wire the backend</h3>
@@ -507,7 +640,7 @@ npm run lint     <span class="text-slate-500"># eslint</span></code></pre>
               </li>
               <li class="flex items-start gap-2">
                 <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>
-                <span>Identity is typically Microsoft Entra ID. The auth screens are the UI for that flow, but no MSAL/token code ships in the shell — add it when the client's tenant and app registration exist. Don't fake it with localStorage sessions in production code.</span>
+                <span>Identity is typically Microsoft Entra ID. <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">@azure/msal-browser</code> ships in the template and the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">entra</code> adapter is real — env-gated behind <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_AZURE_CLIENT_ID</code>, <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_AZURE_TENANT_ID</code>, and optional <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">VITE_AZURE_REDIRECT_URI</code>. The bake still leaves <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">adapter: 'mock'</code>; switch to <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded font-mono text-xs">'entra'</code> when the client's app registration exists. Don't ship the mock's localStorage session to production.</span>
               </li>
               <li class="flex items-start gap-2">
                 <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-primary-600 mt-0.5"></iconify-icon>

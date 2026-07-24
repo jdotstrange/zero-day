@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Icon, Icons, Logo } from '@/components/common'
 import type { NavGroup as NavGroupType } from './types'
 import { NavGroup } from './NavGroup'
 import { navLinkClasses } from './navClasses'
 import { useLocale } from '@/i18n'
+import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 
 interface SidebarProps {
@@ -22,6 +23,8 @@ interface SidebarProps {
 export function Sidebar({ navGroups, isCollapsed, width, isMobileOpen = false, onMobileClose }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([])
   const { t } = useLocale()
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
   const { config } = useTheme()
   const isRtl = config.direction === 'rtl'
 
@@ -79,15 +82,18 @@ export function Sidebar({ navGroups, isCollapsed, width, isMobileOpen = false, o
 
         {/* Footer */}
         <div className="p-3 border-t border-surface-200 dark:border-surface-800">
-          <Link
-            to="/auth/login"
-            onClick={onMobileClose}
+          <button
+            type="button"
+            onClick={() => {
+              onMobileClose?.()
+              void signOut().then(() => navigate('/auth/login'))
+            }}
             className={navLinkClasses(false, isCollapsed)}
             title={isCollapsed ? t('common.logout') : undefined}
           >
             <Icon icon={Icons.logout} className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && <span>{t('common.logout')}</span>}
-          </Link>
+          </button>
         </div>
       </aside>
     </>
